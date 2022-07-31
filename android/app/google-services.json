@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "763661895590",
+    "project_id": "myboards-11314",
+    "storage_bucket": "myboards-11314.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763661895590:android:caedfff9bf5ee3e986b167",
+        "android_client_info": {
+          "package_name": "com.climbtrainingapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "763661895590-9en4l8io9pb51rts3a9eumirplpdl4rh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU8tFPEdniahtFticx4CydAWse2AQOHug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "763661895590-9en4l8io9pb51rts3a9eumirplpdl4rh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
