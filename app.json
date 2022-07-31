@@ -1,0 +1,8 @@
+{
+  "name": "climbtrainingapp",
+  "displayName": "climbtrainingapp",
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-8182705127562776~9145162007",
+    "ios_app_id": "ca-app-pub-8182705127562776~9145162007"
+  }
+}
