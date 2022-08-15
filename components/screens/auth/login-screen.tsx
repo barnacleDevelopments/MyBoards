@@ -1,7 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AuthContext } from '../../../auth/auth_context';
 import RegisterScreen from './register-screen';
+import TextLoader from "../../text-loader";
+import globalStyles from "../../../styles/global";
 
 type SignInProps = {
 
@@ -11,9 +13,13 @@ const SignInScreen = ({ }: SignInProps) => {
   const authContext = useContext(AuthContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isRegister, setRegister] = useState(false)
+  const [isRegister, setRegister] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [signingIn, setSigningIn] = useState(false);
+  
+  useEffect(() => {
+    setErrorMessage("");
+  }, [username, password]);
 
   const handleUsername = (value: string) => {
     setUsername(value.trim());
@@ -24,6 +30,11 @@ const SignInScreen = ({ }: SignInProps) => {
   }
 
   const signInAsync = async () => {
+    if(!username || !password) {
+      setErrorMessage("Both username and password are required. " +
+          "If you don't have an account please press register.")
+      return;
+    }
     setSigningIn(true);
     const response = await authContext.signIn(username, password);
     setSigningIn(false);
@@ -33,13 +44,13 @@ const SignInScreen = ({ }: SignInProps) => {
       }
         break;
       default:
-        setErrorMessage("These was a problem loging in. Please try again.")
+        setErrorMessage("There was a problem logging in. Please try again.")
     }
   };
 
   return (
-    <View>
-      {!isRegister ?
+    <View style={globalStyles.container}>
+      {!isRegister && !signingIn ?
         <View style={{ backgroundColor: '#333333', padding: 15, height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Text style={{ fontSize: 40, textAlign: 'center', color: "#f5f5f5", marginBottom: 15 }}>LOGIN</Text>
           {/* <View style={{ marginBottom: 13 }}>
@@ -59,14 +70,15 @@ const SignInScreen = ({ }: SignInProps) => {
               placeholder='Password...'
               secureTextEntry={true}></TextInput>
           </View>
-          {errorMessage ? <Text style={{ color: "red", fontSize: 18, marginBottom: 13 }}>{errorMessage}</Text> : null}
+          {errorMessage ? <Text style={{ color: "red", textAlign: 'center', fontSize: 18, marginBottom: 13 }}>{errorMessage}</Text> : null}
           <Button color={"#EBB93E"} title={signingIn ? 'Signing In...' : 'Sign In'} onPress={signInAsync} />
           <Text
             onPress={() => setRegister(true)}
-            style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center' }}>Aren't registered yet? Register</Text>
-        </View>
-        :
-        <RegisterScreen onLoginSwitch={() => setRegister(false)} />}
+            style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center' }}>Aren't registered yet? <Text style={{textDecorationLine: 'underline'}}>Register</Text></Text>
+        </View> : null}
+      {isRegister && !signingIn ? <RegisterScreen onLoginSwitch={() => setRegister(false)} /> : null}
+      {signingIn ? <TextLoader text={`Signing In...`}/> : null}
+
     </View>
   );
 }

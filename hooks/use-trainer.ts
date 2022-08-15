@@ -273,10 +273,13 @@ const useTrainer = (workout: Workout): Trainer => {
 
         restTimerId.current = setInterval(() => {
             // every thirty seconds play the remaining seconds
-            let timeLeft: string = `${timerCount.current} seconds left`
+            let timeLeft: string = `${timerCount.current} seconds left`;
+            
             if (halfMinuteCounter === 30) {
                 halfMinuteCounter = 0;
-                playText(timeLeft);
+                if(timerCount.current !== 0) {
+                    playText(timeLeft);
+                }
             }
             halfMinuteCounter++
 
@@ -373,13 +376,20 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description starts countdown and returns promise.
      */
     const startCountdown = () => {
+        setAudioFromBundle("beep_tone.mp3");
         setUIColor('#b4b1ac');
         setUIClock(formatTime(new Date(), timerCount.current))
         let timerFraction: number = 100 / timerCount.current
         const promise: Promise<void> = new Promise((resolve) => {
             countdownTimerId.current = setInterval(() => {
+
+                if (timerCount.current > 1 && timerCount.current < 6) {
+                    bundleSound.play();
+                }
+                
                 timerCount.current -= 1;
                 subtractFromClock();
+           
                 setUIProgress(timerFraction * timerCount.current)
                 if (timerCount.current <= 0) {
                     clearInterval(countdownTimerId.current);
