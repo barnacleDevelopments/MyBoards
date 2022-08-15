@@ -352,18 +352,10 @@ const styles = StyleSheet.create({
         color: "#f5f5f5",
         textAlign: 'center'
     },
-    timerContainer: {
-        display: "flex",
-        backgroundColor: "#333333",
-        justifyContent: "center",
-        alignItems: 'center',
-        flexDirection: "column",
-        width: "100%",
-        marginBottom: 15
-    },
     progressText: {
         fontSize: 20,
         marginBottom: 15,
+        marginTop: 15,
         color: '#f5f5f5'
     },
     instructions: {
