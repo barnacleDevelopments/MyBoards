@@ -16,13 +16,15 @@ export enum YearFraction {
     quarter = 'quarter'
 }
 
-
 const useMyBoardsAPI = () => {
     const authContext = useContext(AuthContext);
 
     // for multiple requests
     let isRefreshing = false;
-    let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: any) => void; }[] = [];
+    let failedQueue: { 
+        resolve: (value: unknown) => void;
+        reject: (reason?: any) => void; 
+    }[] = [];
 
     const processQueue = (error: unknown, token = null) => {
         failedQueue.forEach(prom => {
@@ -42,12 +44,15 @@ const useMyBoardsAPI = () => {
 
         const originalRequest = error.config;
 
+        // if request is not authorized
         if (error.response.status === 401 && !originalRequest._retry) {
-
+            
+            // if in the middle of refresh use old token
             if (isRefreshing) {
                 return new Promise(function (resolve, reject) {
                     failedQueue.push({resolve, reject})
                 }).then(token => {
+                    console.log("Refreshing using old token: ", token )
                     originalRequest.headers['Authorization'] = 'Bearer ' + token;
                     return axios(originalRequest);
                 }).catch(err => {
@@ -72,7 +77,7 @@ const useMyBoardsAPI = () => {
                         axios.defaults.headers.common['Authorization'] = 'Bearer ' + data.accessToken;
                         originalRequest.headers['Authorization'] = 'Bearer ' + data.accessToken;
 
-                        processQueue(null, data.token);
+                        processQueue(null, data.accessToken);
                         resolve(axios(originalRequest));
                     })
                     .catch((err) => {
@@ -84,7 +89,7 @@ const useMyBoardsAPI = () => {
                     })
             })
         }
-        authContext.signOut();
+     
         return Promise.reject(error);
     });
 
