@@ -43,8 +43,11 @@ const SignInScreen = ({ }: SignInProps) => {
         setErrorMessage("Username or password is incorrect.")
       }
         break;
-      default:
-        setErrorMessage("There was a problem logging in. Please try again.")
+      default: {
+        const data = await response.json();
+        console.log(data)
+        setErrorMessage(data.message);
+      }
     }
   };
 
