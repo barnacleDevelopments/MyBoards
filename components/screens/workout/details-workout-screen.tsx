@@ -6,8 +6,10 @@ import Workout from '../../../types/models/workout';
 import globalStyles from '../../../styles/global';
 import WorkoutDetailsItem from './workout-details-item';
 import LoadingPanel from '../../stat-panels/loading-panel';
+
+// HOOKS
 import useAPIError from '../../../hooks/use-api-error';
-import useMyBoardsAPI from "../../../functions/api";
+import useMyBoardsAPI from "../../../hooks/use-myboards-api";
 
 const DetailsWorkoutScreen = ({navigation, route}) => {
     const [workout, setWorkout] = useState<Workout>();

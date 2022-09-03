@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 
 // Hooks
 import {useNetInfo} from '@react-native-community/netinfo';
@@ -18,8 +18,9 @@ import globalStyles from '../../../styles/global';
 import OfflineLoader from '../../offline-loader';
 import Warning from '../../forms/form-components/warning';
 import useAPIError from '../../../hooks/use-api-error';
-import useMyBoardsAPI from "../../../functions/api";
 import PrimaryButton from "../../buttons/primary-btn";
+import {UserContext} from "../../../contexts/user-context";
+import useMyBoardsAPI from "../../../hooks/use-myboards-api";
 
 type RootStackParamList = {
     HangboardScreen: {
@@ -40,10 +41,12 @@ const HangboardScreen = ({navigation}: Props) => {
     const [error, setError] = useState<{ status: boolean, message: string }>({status: false, message: ''});
     const {addError} = useAPIError();
     const {getAllHangboards, deleteHangboard} = useMyBoardsAPI();
+    const {user, updateUser} = useContext(UserContext)
 
     useFocusEffect(
         React.useCallback(() => {
             (async () => {
+                await updateUser()
                 setEditWarning(false);
                 setDeleteWarning(false);
                 try {
@@ -102,7 +105,7 @@ const HangboardScreen = ({navigation}: Props) => {
                 : null}
 
             {/* If no boards exist prompt user to create board */}
-            {hangboards?.length <= 0 && !loading ?
+            {!user?.hasCreatedFirstHangboard && !loading ?
                 <DescriptionBox
                     header="Hangboards List"
                     text={"Here you can add new hangboards. Carefully go through your hangboard's " +
@@ -116,17 +119,18 @@ const HangboardScreen = ({navigation}: Props) => {
                 : null}
 
             <ScrollView style={globalStyles.scrollContainer}>
+                {user?.hasCreatedFirstHangboard ? <Text style={globalStyles.pageHeading}>Hangboards</Text> : null}
+                {user?.hasCreatedFirstHangboard && !hangboards.length ? <Text style={{...globalStyles.text, textAlign: 'center'}}>No hangboards created. Try creating one!</Text> : null}
 
                 {/* If not connected to the internet, show loader */}
                 {loading && netInfo.isConnected ? <LoadingPanel/> : null}
 
                 {/* Offline Loader */}
                 {!netInfo.isConnected ? <OfflineLoader/> : null}
-
+                
                 {/* Hangboards list */}
                 {hangboards?.length > 0 && netInfo.isConnected ?
                     <View>
-                        {hangboards.length !== 0 ? <Text style={globalStyles.pageHeading}>Hangboards</Text> : null}
                         {hangboards.map((x: Hangboard, i: number) =>
                             <HangboardItem
                                 onDeletePress={() => {
@@ -150,7 +154,7 @@ const HangboardScreen = ({navigation}: Props) => {
                     <PrimaryButton
                         title='Create Hangboard'
                         color={"#EBB93E"}
-                        disabled={!netInfo.isConnected || hangboards?.length === 0}
+                        disabled={!netInfo.isConnected}
                         onPress={() => navigation.navigate("Create Hangboard")}></PrimaryButton>
                 </View>}
         </View>

@@ -13,8 +13,9 @@ import useAPIError from '../../../hooks/use-api-error';
 // TYPES
 import Set from "../../../types/set";
 import TextLoader from "../../text-loader";
-import useMyBoardsAPI from "../../../functions/api";
 
+// HOOKS
+import useMyBoardsAPI from "../../../hooks/use-myboards-api";
 
 type RootStackParamList = {
     EditWorkoutScreen: Workout;

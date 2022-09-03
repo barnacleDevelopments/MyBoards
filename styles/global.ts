@@ -24,6 +24,10 @@ const globalStyles = StyleSheet.create({
         textAlign: 'center', 
         marginBottom: 10, 
         fontSize: 20
+    },
+    text: {
+        color: 'white',
+        fontSize: 20
     }
 });
 

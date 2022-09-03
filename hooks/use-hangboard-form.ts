@@ -1,7 +1,9 @@
 import {useEffect, useState} from 'react';
 import {Hangboard} from '../types/models/hangboard';
 import {fingerCount} from '../types/models/set';
-import useMyBoardsAPI from "../functions/api";
+
+// HOOKS
+import useMyBoardsAPI from "./use-myboards-api";
 
 const useHangboardForm = (hangboardId?: number) => {
     const [hangboard, setHangboard] = useState<Hangboard>({

@@ -1,21 +1,20 @@
 import React, {useContext, useEffect, useState} from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import { AuthContext } from '../../../auth/auth_context';
+import {AuthContext} from "../../../contexts/auth-context";
 import RegisterScreen from './register-screen';
 import TextLoader from "../../text-loader";
 import globalStyles from "../../../styles/global";
+import APIErrorNotification from "../../error-notification";
+import useAPIError from "../../../hooks/use-api-error";
 
-type SignInProps = {
-
-};
-
-const SignInScreen = ({ }: SignInProps) => {
-  const authContext = useContext(AuthContext);
+const SignInScreen = () => {
+  const {signIn } = useContext(AuthContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isRegister, setRegister] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [signingIn, setSigningIn] = useState(false);
+  const {error} = useAPIError();
   
   useEffect(() => {
     setErrorMessage("");
@@ -36,7 +35,7 @@ const SignInScreen = ({ }: SignInProps) => {
       return;
     }
     setSigningIn(true);
-    const response = await authContext.signIn(username, password);
+    const response = await signIn(username, password);
     setSigningIn(false);
     switch (response?.status) {
       case 401: {
@@ -53,6 +52,7 @@ const SignInScreen = ({ }: SignInProps) => {
 
   return (
     <View style={globalStyles.container}>
+      {error ? <APIErrorNotification/> : null}
       {!isRegister && !signingIn ?
         <View style={{ backgroundColor: '#333333', padding: 15, height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Text style={{ fontSize: 40, textAlign: 'center', color: "#f5f5f5", marginBottom: 15 }}>LOGIN</Text>

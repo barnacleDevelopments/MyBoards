@@ -8,7 +8,8 @@ import {Coordinates} from "../types/coordinates";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import {useContext} from "react";
-import {AuthContext} from "../auth/auth_context";
+import useAPIError from "../hooks/use-api-error";
+import {AuthContext} from "../contexts/auth-context";
 
 export enum YearFraction {
     week = 'week',
@@ -18,6 +19,7 @@ export enum YearFraction {
 
 const useMyBoardsAPI = () => {
     const authContext = useContext(AuthContext);
+    const {addError} = useAPIError();
 
     // for multiple requests
     let isRefreshing = false;
@@ -38,7 +40,7 @@ const useMyBoardsAPI = () => {
         failedQueue = [];
     }
 
-    axios.interceptors.response.use(function (response) {
+    axios.interceptors.response.use(async function (response) {
         return response;
     }, async function (error) {
 
@@ -52,7 +54,6 @@ const useMyBoardsAPI = () => {
                 return new Promise(function (resolve, reject) {
                     failedQueue.push({resolve, reject})
                 }).then(token => {
-                    console.log("Refreshing using old token: ", token )
                     originalRequest.headers['Authorization'] = 'Bearer ' + token;
                     return axios(originalRequest);
                 }).catch(err => {
@@ -88,6 +89,12 @@ const useMyBoardsAPI = () => {
                         isRefreshing = false
                     })
             })
+        }
+        
+        // refresh token expired or is invalid
+        if(error.response.status === 400) {
+            addError("Logged in on other device", 400);
+            authContext.signOut();
         }
      
         return Promise.reject(error);

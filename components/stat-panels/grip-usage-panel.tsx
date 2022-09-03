@@ -5,7 +5,9 @@ import {VictoryPie} from "victory-native";
 import LoadingPanel from "./loading-panel";
 import NoDataPanel from "./no-data-panel";
 import panelStyles from "../../styles/panel";
-import useMyBoardsAPI, {YearFraction} from "../../functions/api";
+
+// HOOKS
+import useMyBoardsAPI, { YearFraction } from "../../hooks/use-myboards-api";
 
 const GripUsagePanel = () => {
     const [gripUsage, setGripUsage] = useState();

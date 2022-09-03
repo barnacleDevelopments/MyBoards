@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import * as Yup from 'yup';
 
 // Components
@@ -13,11 +12,14 @@ import SelectDropdown from 'react-native-select-dropdown';
 import Workout from '../../types/models/workout';
 import {Hangboard, Hold} from '../../types/models/hangboard';
 
-import useMyBoardsAPI from '../../functions/api';
-import useKeyboardVisible from '../../hooks/use-keyboard-visible';
 import {SetHold} from '../../types/models/set-hold';
-import useAPIError from '../../hooks/use-api-error';
 import SecondaryBtn from "../buttons/secondary-btn";
+
+// HOOKS
+import useMyBoardsAPI from "../../hooks/use-myboards-api";
+import useAPIError from '../../hooks/use-api-error';
+import useKeyboardVisible from '../../hooks/use-keyboard-visible';
+import {useNavigation} from '@react-navigation/native';
 
 const workoutSchema = Yup.object().shape({
     name: Yup.string()

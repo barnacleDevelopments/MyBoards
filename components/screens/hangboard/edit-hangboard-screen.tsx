@@ -7,11 +7,11 @@ import {Hangboard} from '../../../types/models/hangboard';
 // Components
 import {View} from 'react-native';
 import HangboardForm from '../../forms/hangboard-form';
-import useMyBoardsAPI from '../../../functions/api';
 import globalStyles from '../../../styles/global';
 import useHangboardForm from '../../../hooks/use-hangboard-form';
 import useAPIError from '../../../hooks/use-api-error';
 import TextLoader from "../../text-loader";
+import useMyBoardsAPI from "../../../hooks/use-myboards-api";
 
 type RootStackParamList = {
     EditHangboardScreen: {

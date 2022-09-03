@@ -6,7 +6,9 @@ import LoadingPanel from "./loading-panel";
 import NoDataPanel from "./no-data-panel";
 import panelStyles from "../../styles/panel";
 import {Coordinates} from "../../types/coordinates";
-import useMyBoardsAPI from "../../functions/api";
+
+// HOOKS
+import useMyBoardsAPI from "../../hooks/use-myboards-api";
 
 const DailyTrainPanel = () => {
     const [dailySeconds, setDailySeconds] = useState<Array<Coordinates>>([]);

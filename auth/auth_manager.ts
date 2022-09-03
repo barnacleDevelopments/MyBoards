@@ -50,6 +50,27 @@ export class AuthAPIManager {
             console.log(ex.message)
         }
     })
+    
+    static GetUserInfo = async () => {
+        const accessToken = await this.getAccessTokenAsync();
+ 
+        try {
+            const url = `${Config.API_URL}/api/Account/user-info`;
+
+            const options = {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            }
+            const response = await fetch(url, options);
+            return await response.json()
+
+        } catch (ex: any) {
+            console.log(ex.message)
+        }
+    }
 
     static signOutAsync = async () => {
         // Clear storage

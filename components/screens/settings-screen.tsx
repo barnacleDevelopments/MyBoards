@@ -1,8 +1,8 @@
 import React, {useContext} from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Icon} from 'react-native-elements';
-import {AuthContext} from '../../auth/auth_context';
 import globalStyles from '../../styles/global';
+import {AuthContext} from "../../contexts/auth-context";
 
 const SettingsScreen = () => {
 

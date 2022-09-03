@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 
 // Hooks
 import {useNetInfo} from '@react-native-community/netinfo';
@@ -11,14 +11,20 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Button, ScrollView, Text, View} from 'react-native';
 import LoadingPanel from '../../stat-panels/loading-panel';
 import WorkoutItem from './workout-item';
-import useMyBoardsAPI from '../../../functions/api';
-import {useFocusEffect} from '@react-navigation/native';
 import DescriptionBox from '../../description-box';
 import globalStyles from '../../../styles/global';
 import OfflineLoader from '../../offline-loader';
-import useAPIError from '../../../hooks/use-api-error';
+
 import APIErrorNotification from '../../error-notification';
 import PrimaryButton from "../../buttons/primary-btn";
+
+// CONTEXTS
+import {UserContext} from "../../../contexts/user-context";
+
+// HOOKS
+import useAPIError from '../../../hooks/use-api-error';
+import useMyBoardsAPI from '../../../hooks/use-myboards-api';
+import {useFocusEffect} from '@react-navigation/native';
 
 type RootStackParamList = {
     data: Workout;
@@ -31,29 +37,30 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
     const [loading, setLoading] = useState(true);
     const netInfo = useNetInfo();
     const [hangboardCount, setHangboardCount] = useState<number>(0);
-    const [isFirstWorkout, setIsFirstWorkout] = useState(false);
     const {addError, error} = useAPIError();
     const {getHangboardCount, getWorkouts} = useMyBoardsAPI();
+    const {user, updateUser} = useContext(UserContext);
+    const [isFirstWorkout, setIsFirstWorkout] = useState(false);
+    const [hasHangboards, setHasHangboards] = useState(false);
 
-    useFocusEffect(
+      useFocusEffect(
         React.useCallback(() => {
             (async () => {
+                await updateUser();
+                setIsFirstWorkout(!user?.hasCreatedFirstWorkout && hangboardCount > 0)
+        
                 try {
                     const result = Number.parseInt(await getHangboardCount());
                     setHangboardCount(result);
-
+                    setHasHangboards(!!result)
                     if (result === 0) {
                         setLoading(false);
                         return;
                     }
 
                     const workouts = await getWorkouts();
+                    
                     setWorkouts(workouts);
-
-                    if (workouts.length === 0) {
-                        setIsFirstWorkout(true);
-                        return;
-                    }
 
                     setLoading(false);
 
@@ -61,14 +68,13 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
                     addError(`ERROR RETRIEVING WORKOUTS. PLEASE TRY AGAIN.`, ex.status);
                 }
             })();
-        }, [netInfo.isConnected])
+        }, [])
     );
-
-
+    
     return (
         <View style={globalStyles.container}>
             {error ? <APIErrorNotification/> : null}
-            {hangboardCount <= 0 ?
+            {!hasHangboards ?
                 <DescriptionBox
                     header="Workout List"
                     text="Here you can create and train workouts of your 
@@ -82,7 +88,7 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
                 </DescriptionBox>
                 : null}
 
-            {isFirstWorkout ?
+            {hangboardCount ?
                 <DescriptionBox
                     header="Nice!"
                     text="You've got yourself a hangboard configured. Time to create your first workout!"
@@ -95,13 +101,13 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
 
                 {/* Offline Loader */}
                 {!netInfo.isConnected ? <OfflineLoader/> : null}
-
+                {user?.hasCreatedFirstWorkout ? <Text style={globalStyles.pageHeading}>Workouts</Text> : null}
                 {/* Workouts list */}
                 {workouts?.length > 0 && netInfo.isConnected ?
                     <View>
-                        <Text style={globalStyles.pageHeading}>Workouts</Text>
+                       
                         {workouts?.map((w, i) => {
-                            if (isFirstWorkout) {
+                            if (!user?.hasCreatedFirstWorkout) {
                                 return (
                                     <View key={i}>
                                         <DescriptionBox

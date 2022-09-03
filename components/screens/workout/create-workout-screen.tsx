@@ -8,10 +8,12 @@ import {View} from "react-native"
 import Set from '../../../types/models/Set';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Hangboard} from '../../../types/models/hangboard';
-import useMyBoardsAPI from '../../../functions/api';
 import globalStyles from '../../../styles/global';
 import Workout from '../../../types/models/workout';
 import TextLoader from "../../text-loader";
+import useMyBoardsAPI from '../../../hooks/use-myboards-api';
+
+// HOOKS
 
 type RootStackParamList = {
     CreateWorkoutScreen: {};

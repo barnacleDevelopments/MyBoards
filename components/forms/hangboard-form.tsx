@@ -52,6 +52,8 @@ const HangboardForm = ({
         try {
             let imageData: ImageOrVideo = await ImagePicker.openCamera({
                 cropping: true,
+                freeStyleCropEnabled: true,
+                height: 400
             });
 
             onPhoto();

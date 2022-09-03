@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Button, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
-import {AuthContext} from '../../../auth/auth_context';
 import TextLoader from "../../text-loader";
 import * as EmailValidator from 'email-validator';
+import {AuthContext} from "../../../contexts/auth-context";
 
 type RegisterProps = {
     onLoginSwitch: () => void

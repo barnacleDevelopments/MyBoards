@@ -1,14 +1,15 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import React from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 // COMPONENTS
-import {Button, ScrollView, View} from 'react-native';
+import { ScrollView, Text, View} from 'react-native';
 import globalStyles from '../../styles/global';
 
 import DailyTrainPanel from '../stat-panels/daily-train-panel';
 import GripUsagePanel from '../stat-panels/grip-usage-panel';
 import SecondsHangedPanel from '../stat-panels/seconds-hanged-panel';
 import PrimaryButton from "../buttons/primary-btn";
+import {UserContext} from "../../contexts/user-context";
 
 type RootStackParamList = {
     DashScreen: {};
@@ -17,10 +18,18 @@ type RootStackParamList = {
 type Props = NativeStackScreenProps<RootStackParamList, 'DashScreen'>;
 
 const DashScreen = ({navigation}: Props) => {
+    const [greeting, setGreeting] = useState<string>("")
+    const {user} = useContext(UserContext);
 
+    useEffect(() => {
+        const greeting = `Hello ${user?.userName || ""}!`;
+        setGreeting(greeting);
+    }, [user])
+   
     return (
-        <View style={{height: "100%", backgroundColor: '#212021'}}>
+        <View style={{height: "100%", paddingTop: 10, backgroundColor: '#212021'}}>
             <ScrollView style={globalStyles.scrollContainer}>
+                <Text style={{color: 'white', textAlign: 'center', fontSize: 50}}>{greeting}</Text>
                 <SecondsHangedPanel/>
                 <DailyTrainPanel/>
                 <GripUsagePanel/>

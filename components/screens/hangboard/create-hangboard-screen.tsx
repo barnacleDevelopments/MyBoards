@@ -7,10 +7,12 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StyleSheet, Text, View} from 'react-native';
 import HangboardForm from '../../forms/hangboard-form';
 import {Hangboard} from '../../../types/models/hangboard';
-import useMyBoardsAPI from '../../../functions/api';
+import TextLoader from "../../text-loader";
+
+// HOOKS
 import useHangboardForm from '../../../hooks/use-hangboard-form';
 import useAPIError from '../../../hooks/use-api-error';
-import TextLoader from "../../text-loader";
+import useMyBoardsAPI from '../../../hooks/use-myboards-api';
 
 type RootStackParamList = {
     CreateHangboardScreen: {
