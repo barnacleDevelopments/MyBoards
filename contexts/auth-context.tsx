@@ -87,7 +87,6 @@ export default function AuthProvider({children}) {
                 const response = await AuthAPIManager.signInAsync(username, password);
                 const token = await AuthAPIManager.getAccessTokenAsync();
                 dispatch({type: 'SIGN_IN', token: token});
-                await updateUser()
                 return response;
             },
             signOut: async () => {
@@ -98,7 +97,6 @@ export default function AuthProvider({children}) {
             register: async (username: string, password: string, email: string) => {
                 const response = await AuthAPIManager.registerAsync(username, password, email);
                 dispatch({type: 'REGISTER'});
-                await updateUser()
                 return response;
             }
         }), []);

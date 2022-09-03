@@ -6,9 +6,11 @@ import TextLoader from "../../text-loader";
 import globalStyles from "../../../styles/global";
 import APIErrorNotification from "../../error-notification";
 import useAPIError from "../../../hooks/use-api-error";
+import {UserContext} from "../../../contexts/user-context";
 
 const SignInScreen = () => {
-  const {signIn } = useContext(AuthContext);
+  const {signIn} = useContext(AuthContext);
+  const {updateUser} = useContext(UserContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isRegister, setRegister] = useState(false);
@@ -36,6 +38,7 @@ const SignInScreen = () => {
     }
     setSigningIn(true);
     const response = await signIn(username, password);
+    await updateUser()
     setSigningIn(false);
     switch (response?.status) {
       case 401: {
@@ -44,7 +47,6 @@ const SignInScreen = () => {
         break;
       default: {
         const data = await response.json();
-        console.log(data)
         setErrorMessage(data.message);
       }
     }

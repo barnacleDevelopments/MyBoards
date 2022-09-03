@@ -74,7 +74,7 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
     return (
         <View style={globalStyles.container}>
             {error ? <APIErrorNotification/> : null}
-            {!hasHangboards ?
+            {!hasHangboards && !user?.hasCreatedFirstHangboard ?
                 <DescriptionBox
                     header="Workout List"
                     text="Here you can create and train workouts of your 
@@ -88,7 +88,7 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
                 </DescriptionBox>
                 : null}
 
-            {hangboardCount ?
+            {workouts.length === 0 && !user?.hasCreatedFirstWorkout && hangboardCount ?
                 <DescriptionBox
                     header="Nice!"
                     text="You've got yourself a hangboard configured. Time to create your first workout!"
@@ -102,10 +102,16 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
                 {/* Offline Loader */}
                 {!netInfo.isConnected ? <OfflineLoader/> : null}
                 {user?.hasCreatedFirstWorkout ? <Text style={globalStyles.pageHeading}>Workouts</Text> : null}
+                
+                {user?.hasCreatedFirstWorkout && !workouts.length && hasHangboards ? <Text style={{...globalStyles.text, textAlign: 'center'}}>
+                    Looks like you don't have any workouts. Try creating one! </Text> : null}
+
+                {!hasHangboards ? <Text style={{...globalStyles.text, textAlign: 'center'}}>
+                    Looks like you don't have any hangboards. Go and make one first! </Text> : null}
+                
                 {/* Workouts list */}
                 {workouts?.length > 0 && netInfo.isConnected ?
                     <View>
-                       
                         {workouts?.map((w, i) => {
                             if (!user?.hasCreatedFirstWorkout) {
                                 return (

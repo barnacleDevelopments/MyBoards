@@ -8,8 +8,8 @@ const PrimaryButton = ({
                              disabled
                          }: { title: string, color: string, disabled?: boolean, onPress?: (event: GestureResponderEvent) => void }) => {
     return (
-            <Pressable disabled={disabled} style={{...styles.button, backgroundColor: color}} onPress={onPress}>
-                <Text style={styles.text}>{title}</Text>
+            <Pressable disabled={disabled} style={{...styles.button,  backgroundColor: disabled ? '#808080' : color}} onPress={onPress}>
+                <Text style={{...styles.text,color: disabled ? 'black' : 'white'}}>{title}</Text>
             </Pressable>
     );
 }
