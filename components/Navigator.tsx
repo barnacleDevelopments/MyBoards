@@ -11,6 +11,7 @@ import EditWorkoutScreen from "./screens/workout/edit-workout-screen";
 import React, {useContext} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {AuthContext} from "../contexts/auth-context";
+import PasswordResetScreen from "./screens/auth/password-reset-screen";
 
 type RootStackParamList = {};
 
@@ -31,24 +32,30 @@ const Navigator = () => {
     
     return (
         <Stack.Navigator>
-            {state.isLoading ? (
-                <Stack.Screen
+            <Stack.Group>
+                {state.isLoading ? (
+                    <Stack.Screen
+                        options={{headerShown: false}}
+                        name='Loading'
+                        component={AuthLoadingScreen}/>
+                ) : state.userToken == null ? (
+                    <Stack.Screen
+                        options={{headerShown: false}}
+                        name='SignIn'
+                        component={SignInScreen}
+                    />
+                ) : (
+                    <Stack.Screen
+                        options={{headerShown: false}}
+                        name='Main'
+                        component={HomeScreen}/>
+                )}
+                <Stack.Screen 
                     options={{headerShown: false}}
-                    name='Loading'
-                    component={AuthLoadingScreen}/>
-            ) : state.userToken == null ? (
-                <Stack.Screen
-                    options={{headerShown: false}}
-                    name='SignIn'
-                    component={SignInScreen}
+                    name={'Password Reset'} 
+                    component={PasswordResetScreen}
                 />
-            ) : (
-                <Stack.Screen
-                    options={{headerShown: false}}
-                    name='Main'
-                    component={HomeScreen}/>
-            )}
-            {/* Modals */}
+            </Stack.Group>
             <Stack.Group
                 screenOptions={{presentation: 'modal'}}
             >

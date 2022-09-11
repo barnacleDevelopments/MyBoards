@@ -7,6 +7,8 @@ import globalStyles from "../../../styles/global";
 import APIErrorNotification from "../../error-notification";
 import useAPIError from "../../../hooks/use-api-error";
 import {UserContext} from "../../../contexts/user-context";
+import navigator from "../../Navigator";
+import {useNavigation} from "@react-navigation/native";
 
 const SignInScreen = () => {
   const {signIn} = useContext(AuthContext);
@@ -17,6 +19,7 @@ const SignInScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [signingIn, setSigningIn] = useState(false);
   const {error} = useAPIError();
+  const navigator = useNavigation();
   
   useEffect(() => {
     setErrorMessage("");
@@ -58,10 +61,6 @@ const SignInScreen = () => {
       {!isRegister && !signingIn ?
         <View style={{ backgroundColor: '#333333', padding: 15, height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Text style={{ fontSize: 40, textAlign: 'center', color: "#f5f5f5", marginBottom: 15 }}>LOGIN</Text>
-          {/* <View style={{ marginBottom: 13 }}>
-        <Text style={styles.headerOne}>MyBoards Beta</Text>
-        <Text style={{ fontSize: 15, textAlign: "center", color: '#f5f5f5' }}>Welcome! I hope you enjoy your time with this early version of my handboard training app.</Text>
-      </View> */}
           <View>
             <TextInput
               style={styles.input}
@@ -80,6 +79,9 @@ const SignInScreen = () => {
           <Text
             onPress={() => setRegister(true)}
             style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center' }}>Aren't registered yet? <Text style={{textDecorationLine: 'underline'}}>Register</Text></Text>
+          <Text
+              onPress={() => navigator.navigate("Password Reset")}
+              style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center' }}>Forgot your password? <Text style={{textDecorationLine: 'underline'}}>Reset Password</Text></Text>
         </View> : null}
       {isRegister && !signingIn ? <RegisterScreen onLoginSwitch={() => setRegister(false)} /> : null}
       {signingIn ? <TextLoader text={`Signing In...`}/> : null}
