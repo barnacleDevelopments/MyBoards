@@ -82,6 +82,9 @@ const SignInScreen = () => {
           <Text
               onPress={() => navigator.navigate("Password Reset")}
               style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center' }}>Forgot your password? <Text style={{textDecorationLine: 'underline'}}>Reset Password</Text></Text>
+          <Text
+              onPress={() => navigator.navigate("Password Reset")}
+              style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center', textDecorationLine: "underline" }}>Resend Confirmation Email</Text>
         </View> : null}
       {isRegister && !signingIn ? <RegisterScreen onLoginSwitch={() => setRegister(false)} /> : null}
       {signingIn ? <TextLoader text={`Signing In...`}/> : null}
