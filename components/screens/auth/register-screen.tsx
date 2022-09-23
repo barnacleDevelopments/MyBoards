@@ -5,10 +5,11 @@ import * as EmailValidator from 'email-validator';
 import {AuthContext} from "../../../contexts/auth-context";
 
 type RegisterProps = {
-    onLoginSwitch: () => void
+    onRegister: () => void,
+    onReturnToLogin: () => void
 };
 
-const RegisterScreen = ({onLoginSwitch}: RegisterProps) => {
+const RegisterScreen = ({onRegister, onReturnToLogin}: RegisterProps) => {
     const authContext = useContext(AuthContext);
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
@@ -58,7 +59,7 @@ const RegisterScreen = ({onLoginSwitch}: RegisterProps) => {
         const data = await response.json()
         switch (response?.status) {
             case 200:
-                onLoginSwitch();
+                onRegister(data);
                 break;
             case 500: {
                 setErrorMessage(data.message);
@@ -109,7 +110,7 @@ const RegisterScreen = ({onLoginSwitch}: RegisterProps) => {
                         match.</Text> : null}
                 </View>
                 <Button color={"#EBB93E"} title='Register' onPress={registerAsync}/>
-                <Text onPress={onLoginSwitch}
+                <Text onPress={onReturnToLogin}
                       style={{color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center'}}>Back to login</Text>
             </ScrollView> : null}
             {registering ? <TextLoader text={`Creating Account...`}/> : null}

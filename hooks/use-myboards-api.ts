@@ -45,7 +45,7 @@ const useMyBoardsAPI = () => {
     }, async function (error) {
 
         const originalRequest = error.config;
-
+        
         // if request is not authorized
         if (error.response.status === 401 && !originalRequest._retry) {
             
@@ -131,7 +131,8 @@ const useMyBoardsAPI = () => {
                 Authorization: `Bearer ${accessToken}`
             }
         });
-
+        
+      
         return response.data
     };
 

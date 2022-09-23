@@ -7,8 +7,8 @@ import globalStyles from "../../../styles/global";
 import APIErrorNotification from "../../error-notification";
 import useAPIError from "../../../hooks/use-api-error";
 import {UserContext} from "../../../contexts/user-context";
-import navigator from "../../Navigator";
 import {useNavigation} from "@react-navigation/native";
+import ConfirmPopUp from "./confirm-pop-up";
 
 const SignInScreen = () => {
   const {signIn} = useContext(AuthContext);
@@ -20,17 +20,23 @@ const SignInScreen = () => {
   const [signingIn, setSigningIn] = useState(false);
   const {error} = useAPIError();
   const navigator = useNavigation();
+  const [registerPopUpActive, setRegisterPopUpActive]  = useState(false);
   
   useEffect(() => {
     setErrorMessage("");
   }, [username, password]);
-
+  
   const handleUsername = (value: string) => {
     setUsername(value.trim());
   }
 
   const handlePassword = (value: string) => {
     setPassword(value.trim());
+  }
+  
+  const handleRegister = (data) => {
+    setRegister(false)
+    setRegisterPopUpActive(true)
   }
 
   const signInAsync = async () => {
@@ -83,12 +89,14 @@ const SignInScreen = () => {
               onPress={() => navigator.navigate("Password Reset")}
               style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center' }}>Forgot your password? <Text style={{textDecorationLine: 'underline'}}>Reset Password</Text></Text>
           <Text
-              onPress={() => navigator.navigate("Password Reset")}
+              onPress={() => navigator.navigate("Email Confirmation")}
               style={{ color: "#EBB93E", fontSize: 18, marginTop: 10, textAlign: 'center', textDecorationLine: "underline" }}>Resend Confirmation Email</Text>
         </View> : null}
-      {isRegister && !signingIn ? <RegisterScreen onLoginSwitch={() => setRegister(false)} /> : null}
+      {isRegister && !signingIn ? <RegisterScreen onRegister={handleRegister} onReturnToLogin={() => setRegister(false)} /> : null}
       {signingIn ? <TextLoader text={`Signing In...`}/> : null}
-
+      {registerPopUpActive ? <ConfirmPopUp title="Email Sent!"
+                                           text="Please visit your inbox to confirm your email address. Then you can login!" 
+                                           onConfirm={() => setRegisterPopUpActive(false)}  /> : null }
     </View>
   );
 }

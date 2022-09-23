@@ -56,7 +56,6 @@ export class AuthAPIManager {
  
         try {
             const url = `${Config.API_URL}/api/Account/user-info`;
-
             const options = {
                 method: "GET",
                 headers: {
@@ -65,8 +64,9 @@ export class AuthAPIManager {
                 }
             }
             const response = await fetch(url, options);
-            return await response.json()
 
+            return await response.json()
+            
         } catch (ex: any) {
             console.log(ex.message)
         }
@@ -80,8 +80,8 @@ export class AuthAPIManager {
     };
 
     static getAccessTokenAsync = async () => {
-
+        const accessToken = await AsyncStorage.getItem('accessToken');
         // Not expired, just return saved access token
-        return await AsyncStorage.getItem('accessToken');
+        return accessToken
     };
 }

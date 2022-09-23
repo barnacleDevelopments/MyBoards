@@ -12,6 +12,7 @@ import React, {useContext} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {AuthContext} from "../contexts/auth-context";
 import PasswordResetScreen from "./screens/auth/password-reset-screen";
+import ResendEmailConfirmationScreen from "./screens/auth/resend-email-confirmation-screen";
 
 type RootStackParamList = {};
 
@@ -54,6 +55,11 @@ const Navigator = () => {
                     options={{headerShown: false}}
                     name={'Password Reset'} 
                     component={PasswordResetScreen}
+                />
+                <Stack.Screen
+                    options={{headerShown: false}}
+                    name={'Email Confirmation'}
+                    component={ResendEmailConfirmationScreen}
                 />
             </Stack.Group>
             <Stack.Group

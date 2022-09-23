@@ -1,4 +1,5 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet } from "react-native";
+import colors from "./colors";
 
 const globalStyles = StyleSheet.create({
     container: {
@@ -28,6 +29,12 @@ const globalStyles = StyleSheet.create({
     text: {
         color: 'white',
         fontSize: 20
+    },
+    linkText: {
+        color: colors.primary,
+        fontSize: 20,
+        marginTop: 10,
+        textDecorationLine: 'underline'
     }
 });
 
