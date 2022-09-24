@@ -16,7 +16,7 @@ import SecondaryButton from "../../buttons/secondary-btn";
 
 interface SetDropDownProps {
     onInstructionInput: (setIndex: number, value: string) => void,
-    onSliderUpdate: (index: number, prop: string, value: number) => void,
+    onFieldUpdate:(index: number, prop: string, value: number) => void,
     onGripSelect: (setIndex: number, hand: string, itemIndex: number) => void,
     onHoldPress: (hold: Hold, setIndex: number) => void,
     onDuplicate: (setIndex: number) => void,
@@ -27,10 +27,12 @@ interface SetDropDownProps {
     isLastSet: boolean
 }
 
+let timerId;
+
 const SetDropownMenu = ({
                             onHoldPress,
                             onInstructionInput,
-                            onSliderUpdate,
+                            onFieldUpdate,
                             onGripSelect,
                             onRemove,
                             onDuplicate,
@@ -61,6 +63,28 @@ const SetDropownMenu = ({
 
     const toggleExpanded = () =>
         isExpanded ? setIsExpanded(false) : setIsExpanded(true);
+
+    const handleFieldHold = (setIndex: number, fieldName: string, currentValue: number, direction: "down" | "up") => {
+        switch (direction) {
+            case "down":
+                if(!timerId)
+                timerId = setInterval(() => {
+                    onFieldUpdate(setIndex, fieldName,set[fieldName] > 1 ? set[fieldName] - 1 : set[fieldName]);
+                }, 50);
+                break;
+            case "up":
+                if(!timerId)
+                timerId = setInterval(() => {
+                    onFieldUpdate(setIndex, fieldName,  set[fieldName] > 0 ? set[fieldName] + 1 : set[fieldName]);
+                }, 50);
+                break
+        }
+    }
+    
+    const onFieldOut = () => {
+        clearInterval(timerId);
+        timerId = null;
+    }
 
     return (
         <ListItem.Accordion
@@ -217,19 +241,44 @@ const SetDropownMenu = ({
                         <View style={styles.sliderContainer}>
                             <View style={styles.sliderTextBox}>
                                 <Text>HANG TIME</Text>
-                                <Text style={styles.sliderText}>{secondsToMinutes(set.hangTime)}</Text>
+                                <View style={styles.incrementer}>
+                                    <Pressable style={styles.updateBtn} 
+                                               onPress={() => onFieldUpdate(setIndex, "hangTime", set.hangTime - 1)}
+                                               onLongPress={() => handleFieldHold(setIndex, "hangTime", set.hangTime, "down")}
+                                               onPressOut={onFieldOut}>
+                                        <Text style={styles.updateBtnText}>-</Text>
+                                    </Pressable>
+                                    <Text style={styles.timeText}>{secondsToMinutes(set.hangTime)}</Text>
+                                    <Pressable style={styles.updateBtn} 
+                                               onPress={() => onFieldUpdate(setIndex, "hangTime", set.hangTime + 1)}
+                                               onLongPress={() => handleFieldHold(setIndex, "hangTime", set.hangTime, "up")}
+                                               onPressOut={onFieldOut}>
+                                        <Text style={styles.updateBtnText}>+</Text>
+                                    </Pressable>
+                                </View>
                             </View>
-                            <Slider
-                                style={{width: "100%"}}
-                                minimumValue={1}
-                                maximumValue={50}
-                                minimumTrackTintColor="#FFFFFF"
-                                maximumTrackTintColor="#000000"
-                                thumbTintColor="#EBB93E"
-                                value={set.hangTime}
-                                onValueChange={value => onSliderUpdate(setIndex, "hangTime", value)}
-                                onLayout={e => e.preventDefault()}
-                            />
+                        </View>
+                    </View>
+                    <View style={styles.incrementerContainer}>
+                        <View style={styles.sliderContainer}>
+                            <View style={styles.sliderTextBox}>
+                                <Text>REST TIME</Text>
+                                <View style={styles.incrementer}>
+                                    <Pressable style={styles.updateBtn} 
+                                               onPress={() => onFieldUpdate(setIndex, "restTime", set.restTime - 1)}
+                                               onLongPress={() => handleFieldHold(setIndex, "restTime", set.restTime, "down")}
+                                               onPressOut={onFieldOut}>
+                                        <Text style={styles.updateBtnText}>-</Text>
+                                    </Pressable>
+                                    <Text style={styles.timeText}>{secondsToMinutes(set.restTime)}</Text>
+                                    <Pressable style={styles.updateBtn} 
+                                               onPress={() => onFieldUpdate(setIndex, "restTime", set.restTime + 1)}
+                                               onLongPress={() => handleFieldHold(setIndex, "restTime", set.restTime, "up")}
+                                               onPressOut={onFieldOut}>
+                                        <Text style={styles.updateBtnText}>+</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
                         </View>
                     </View>
                     <View style={styles.incrementerContainer}>
@@ -246,26 +295,7 @@ const SetDropownMenu = ({
                                 maximumTrackTintColor="#000000"
                                 thumbTintColor="#EBB93E"
                                 value={set.reps}
-                                onValueChange={value => onSliderUpdate(setIndex, "reps", value)}
-                                onLayout={e => e.preventDefault()}
-                            />
-                        </View>
-                    </View>
-                    <View style={styles.incrementerContainer}>
-                        <View style={styles.sliderContainer}>
-                            <View style={styles.sliderTextBox}>
-                                <Text>REST TIME</Text>
-                                <Text style={styles.sliderText}>{secondsToMinutes(set.restTime)}</Text>
-                            </View>
-                            <Slider
-                                style={{width: "100%"}}
-                                minimumValue={1}
-                                maximumValue={1200}
-                                minimumTrackTintColor="#FFFFFF"
-                                maximumTrackTintColor="#000000"
-                                thumbTintColor="#EBB93E"
-                                value={set.restTime}
-                                onValueChange={value => onSliderUpdate(setIndex, "restTime", value)}
+                                onValueChange={value => onFieldUpdate(setIndex, "reps", value)}
                                 onLayout={e => e.preventDefault()}
                             />
                         </View>
@@ -273,20 +303,23 @@ const SetDropownMenu = ({
                     {!isLastSet ? <View style={styles.incrementerContainer}>
                         <View style={styles.sliderContainer}>
                             <View style={styles.sliderTextBox}>
-                                <Text> REST BEFORE NEXT SET</Text>
-                                <Text style={styles.sliderText}>{secondsToMinutes(set.restBeforeNextSet)}</Text>
+                                <Text>REST BEFORE NEXT SET</Text>
+                                <View style={styles.incrementer}>
+                                    <Pressable style={styles.updateBtn}
+                                               onLongPress={() => handleFieldHold(setIndex, "restBeforeNextSet", set.restBeforeNextSet, "down")}
+                                               onPressOut={onFieldOut}
+                                               onPress={() => onFieldUpdate(setIndex, "restBeforeNextSet", set.restBeforeNextSet - 1)}>
+                                        <Text style={styles.updateBtnText}>-</Text>
+                                    </Pressable>
+                                    <Text style={styles.timeText}>{secondsToMinutes(set.restBeforeNextSet)}</Text>
+                                    <Pressable style={styles.updateBtn}
+                                               onLongPress={() => handleFieldHold(setIndex, "restBeforeNextSet", set.restBeforeNextSet, "up")}
+                                               onPressOut={onFieldOut}
+                                               onPress={() => onFieldUpdate(setIndex, "restBeforeNextSet", set.restBeforeNextSet + 1)}>
+                                        <Text style={styles.updateBtnText}>+</Text>
+                                    </Pressable>
+                                </View>
                             </View>
-                            <Slider
-                                style={{width: "100%"}}
-                                minimumValue={1}
-                                maximumValue={1200}
-                                minimumTrackTintColor="#FFFFFF"
-                                maximumTrackTintColor="#000000"
-                                thumbTintColor="#EBB93E"
-                                value={set.restBeforeNextSet}
-                                onValueChange={value => onSliderUpdate(setIndex, "restBeforeNextSet", value)}
-                                onLayout={e => e.preventDefault()}
-                            />
                         </View>
                     </View> : null}
                 </View> : null}
@@ -297,6 +330,31 @@ const SetDropownMenu = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: '#333333'
+    },
+    incrementer: {
+        display: "flex", 
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    updateBtn: {
+        backgroundColor: "white",
+        height: 40,
+        width: 40,
+        borderRadius: 4,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    updateBtnText: {
+        fontSize: 20,
+        color: "black",
+        fontWeight: "bold",
+        textAlignVertical: 'center',
+    },
+    timeText: {
+        fontSize: 20,
+        marginRight: 15,
+        marginLeft: 15
     },
     setHeaderButtons: {
         display: 'flex',
