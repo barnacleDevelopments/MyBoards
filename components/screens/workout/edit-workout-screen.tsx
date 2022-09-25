@@ -44,7 +44,8 @@ const EditWorkoutScreen = ({navigation, route}: Props) => {
         rightGripType: 0,
         leftGripType: 0,
         indexPosition: 0,
-        setHolds: []
+        setHolds: [],
+        weight: 0
     }
 
     useEffect(() => {

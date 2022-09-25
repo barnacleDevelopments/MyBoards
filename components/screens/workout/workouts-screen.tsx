@@ -106,7 +106,7 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
                 {user?.hasCreatedFirstWorkout && !workouts.length && hasHangboards ? <Text style={{...globalStyles.text, textAlign: 'center'}}>
                     Looks like you don't have any workouts. Try creating one! </Text> : null}
 
-                {!hasHangboards ? <Text style={{...globalStyles.text, textAlign: 'center'}}>
+                {!hasHangboards && user?.hasCreatedFirstHangboard ? <Text style={{...globalStyles.text, textAlign: 'center', marginTop: 10}}>
                     Looks like you don't have any hangboards. Go and make one first! </Text> : null}
                 
                 {/* Workouts list */}

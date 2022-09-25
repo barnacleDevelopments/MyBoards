@@ -16,11 +16,12 @@ import SecondaryButton from "../../buttons/secondary-btn";
 
 interface SetDropDownProps {
     onInstructionInput: (setIndex: number, value: string) => void,
-    onFieldUpdate:(index: number, prop: string, value: number) => void,
+    onFieldUpdate: (index: number, prop: string, value: number) => void,
     onGripSelect: (setIndex: number, hand: string, itemIndex: number) => void,
     onHoldPress: (hold: Hold, setIndex: number) => void,
     onDuplicate: (setIndex: number) => void,
     onRemove: (setIndex: number) => void,
+    onMove: (setIndex: number, direction: "up" | "down") => void,
     set: Set,
     setIndex: number,
     hangboard: Hangboard,
@@ -35,6 +36,7 @@ const SetDropownMenu = ({
                             onFieldUpdate,
                             onGripSelect,
                             onRemove,
+                            onMove,
                             onDuplicate,
                             set,
                             setIndex,
@@ -65,22 +67,27 @@ const SetDropownMenu = ({
         isExpanded ? setIsExpanded(false) : setIsExpanded(true);
 
     const handleFieldHold = (setIndex: number, fieldName: string, currentValue: number, direction: "down" | "up") => {
+        let cap = 1;
+        if(fieldName === "weight") cap = 0;
         switch (direction) {
             case "down":
-                if(!timerId)
-                timerId = setInterval(() => {
-                    onFieldUpdate(setIndex, fieldName,set[fieldName] > 1 ? set[fieldName] - 1 : set[fieldName]);
-                }, 50);
+                if (timerId) break;
+                    timerId = setInterval(() => {
+                        onFieldUpdate(setIndex, fieldName, set[fieldName] > cap ? 
+                            set[fieldName] - 1 : set[fieldName]);
+                    }, 50);
+                    
                 break;
             case "up":
-                if(!timerId)
-                timerId = setInterval(() => {
-                    onFieldUpdate(setIndex, fieldName,  set[fieldName] > 0 ? set[fieldName] + 1 : set[fieldName]);
-                }, 50);
+                if (timerId) break;
+                    timerId = setInterval(() => {
+                        onFieldUpdate(setIndex, fieldName, set[fieldName] >= cap ? 
+                            set[fieldName] + 1 : set[fieldName]);
+                    }, 50);
                 break
         }
     }
-    
+
     const onFieldOut = () => {
         clearInterval(timerId);
         timerId = null;
@@ -94,19 +101,27 @@ const SetDropownMenu = ({
                 <ListItem.Content>
                     <ListItem.Title style={styles.title}>
                         <View style={styles.titleTextContainer}>
+                            <View style={styles.moveSetBtnContainer}>
+                                {!(setIndex - 1 < 0) ? <Pressable onPress={() => onMove(setIndex, "up")} 
+                                           style={[{marginBottom: 3, transform: [{rotate: "90deg"}] }, styles.moveSetBtn]}>
+                                    <Text style={styles.moveSetBtnText}>{"<"}</Text>
+                                </Pressable> : null}
+                                {!isLastSet ? <Pressable onPress={() => onMove(setIndex, "down")} 
+                                           style={styles.moveSetBtn}>
+                                    <Text style={styles.moveSetBtnText}>{">"}</Text>
+                                </Pressable> : null}
+                            </View>
                             <Text style={styles.headerText}>Set {setIndex + 1}</Text>
                             <View style={styles.setHeaderButtons}>
                                 <View style={{marginRight: 10}}>
-                                    {setIndex !== 0 ?
-                                        <SecondaryButton
-                                            title="remove"
-                                            color={'#710C10'}
-                                            onPress={() => onRemove(setIndex)}/> : null}
+                                    {setIndex !== 0 ? <SecondaryButton title="remove"
+                                                                       color={'#710C10'}
+                                                                       onPress={() => onRemove(setIndex)}/> : null}
                                 </View>
                                 <SecondaryButton
                                     title="duplicate"
                                     onPress={() => onDuplicate(setIndex)}
-                                    color={'#710C10'}
+                                    color={'black'}
                                 />
                             </View>
                         </View>
@@ -220,131 +235,130 @@ const SetDropownMenu = ({
                     one hold must be selected.
                 </Text> : null}
 
-            {set ?
-                <View style={styles.setContainer}>
-                    <View style={styles.setInstructionContainer}>
-                        <Text style={{...styles.text, marginBottom: 8, fontSize: 20}}>Instructions</Text>
-                        <TextInput
-                            multiline={true}
-                            maxLength={51}
-                            style={styles.textInput}
-                            placeholder="write instructions..."
-                            autoCapitalize="none"
-                            defaultValue={set.instructions || ""}
-                            onChangeText={handleInstructions}
+            {set ? <View style={styles.setContainer}>
+                <View style={styles.setInstructionContainer}>
+                    <Text style={{...styles.text, marginBottom: 8, fontSize: 20}}>Instructions</Text>
+                    <TextInput
+                        multiline={true}
+                        maxLength={51}
+                        style={styles.textInput}
+                        placeholder="write instructions..."
+                        autoCapitalize="none"
+                        defaultValue={set.instructions || ""}
+                        onChangeText={handleInstructions}
+                    />
+                    {!instructionsValid ? (
+                        <Text style={styles.validationMessage}>length cannot exceed 50 characters</Text>
+                    ) : null}
+                </View>
+                <View style={styles.incrementerContainer}>
+                    <View style={styles.sliderContainer}>
+                        <View style={styles.sliderTextBox}>
+                            <Text style={styles.adjusterText}>HANG TIME</Text>
+                            <View style={styles.incrementer}>
+                                <Pressable style={styles.updateBtn}
+                                           onPress={() => onFieldUpdate(setIndex, "hangTime", set.hangTime - 1)}
+                                           onLongPress={() => handleFieldHold(setIndex, "hangTime", set.hangTime, "down")}
+                                           onPressOut={onFieldOut}>
+                                    <Text style={styles.updateBtnText}>-</Text>
+                                </Pressable>
+                                <Text style={styles.timeText}>{secondsToMinutes(set.hangTime)}</Text>
+                                <Pressable style={styles.updateBtn}
+                                           onPress={() => onFieldUpdate(setIndex, "hangTime", set.hangTime + 1)}
+                                           onLongPress={() => handleFieldHold(setIndex, "hangTime", set.hangTime, "up")}
+                                           onPressOut={onFieldOut}>
+                                    <Text style={styles.updateBtnText}>+</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.incrementerContainer}>
+                    <View style={styles.sliderContainer}>
+                        <View style={styles.sliderTextBox}>
+                            <Text style={styles.adjusterText}>REST TIME</Text>
+                            <View style={styles.incrementer}>
+                                <Pressable style={styles.updateBtn}
+                                           onPress={() => onFieldUpdate(setIndex, "restTime", set.restTime - 1)}
+                                           onLongPress={() => handleFieldHold(setIndex, "restTime", set.restTime, "down")}
+                                           onPressOut={onFieldOut}>
+                                    <Text style={styles.updateBtnText}>-</Text>
+                                </Pressable>
+                                <Text style={styles.timeText}>{secondsToMinutes(set.restTime)}</Text>
+                                <Pressable style={styles.updateBtn}
+                                           onPress={() => onFieldUpdate(setIndex, "restTime", set.restTime + 1)}
+                                           onLongPress={() => handleFieldHold(setIndex, "restTime", set.restTime, "up")}
+                                           onPressOut={onFieldOut}>
+                                    <Text style={styles.updateBtnText}>+</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.incrementerContainer}>
+                    <View style={styles.sliderContainer}>
+                        <View style={styles.sliderTextBox}>
+                            <Text style={styles.adjusterText}>REPS</Text>
+                            <Text style={styles.sliderText}>{set.reps}</Text>
+                        </View>
+                        <Slider
+                            style={{width: "100%"}}
+                            minimumValue={1}
+                            maximumValue={10}
+                            minimumTrackTintColor="#FFFFFF"
+                            maximumTrackTintColor="#000000"
+                            thumbTintColor="#EBB93E"
+                            value={set.reps}
+                            onValueChange={value => onFieldUpdate(setIndex, "reps", value)}
+                            onLayout={e => e.preventDefault()}
                         />
-                        {!instructionsValid ? (
-                            <Text style={styles.validationMessage}>length cannot exceed 50 characters</Text>
-                        ) : null}
                     </View>
-                    <View style={styles.incrementerContainer}>
-                        <View style={styles.sliderContainer}>
-                            <View style={styles.sliderTextBox}>
-                                <Text>HANG TIME</Text>
-                                <View style={styles.incrementer}>
-                                    <Pressable style={styles.updateBtn} 
-                                               onPress={() => onFieldUpdate(setIndex, "hangTime", set.hangTime - 1)}
-                                               onLongPress={() => handleFieldHold(setIndex, "hangTime", set.hangTime, "down")}
-                                               onPressOut={onFieldOut}>
-                                        <Text style={styles.updateBtnText}>-</Text>
-                                    </Pressable>
-                                    <Text style={styles.timeText}>{secondsToMinutes(set.hangTime)}</Text>
-                                    <Pressable style={styles.updateBtn} 
-                                               onPress={() => onFieldUpdate(setIndex, "hangTime", set.hangTime + 1)}
-                                               onLongPress={() => handleFieldHold(setIndex, "hangTime", set.hangTime, "up")}
-                                               onPressOut={onFieldOut}>
-                                        <Text style={styles.updateBtnText}>+</Text>
-                                    </Pressable>
-                                </View>
+                </View>
+                <View style={styles.incrementerContainer}>
+                    <View style={styles.sliderContainer}>
+                        <View style={styles.sliderTextBox}>
+                            <Text style={styles.adjusterText}>EXTRA WEIGHT</Text>
+                            <View style={styles.incrementer}>
+                                <Pressable style={styles.updateBtn}
+                                           onPress={() => onFieldUpdate(setIndex, "weight", set.weight - 1)}
+                                           onLongPress={() => handleFieldHold(setIndex, "weight", set.weight, "down")}
+                                           onPressOut={onFieldOut}>
+                                    <Text style={styles.updateBtnText}>-</Text>
+                                </Pressable>
+                                <Text style={styles.timeText}>{set.weight}lb</Text>
+                                <Pressable style={styles.updateBtn}
+                                           onPress={() => onFieldUpdate(setIndex, "weight", set.weight + 1)}
+                                           onLongPress={() => handleFieldHold(setIndex, "weight", set.weight, "up")}
+                                           onPressOut={onFieldOut}>
+                                    <Text style={styles.updateBtnText}>+</Text>
+                                </Pressable>
                             </View>
                         </View>
                     </View>
-                    <View style={styles.incrementerContainer}>
-                        <View style={styles.sliderContainer}>
-                            <View style={styles.sliderTextBox}>
-                                <Text>REST TIME</Text>
-                                <View style={styles.incrementer}>
-                                    <Pressable style={styles.updateBtn} 
-                                               onPress={() => onFieldUpdate(setIndex, "restTime", set.restTime - 1)}
-                                               onLongPress={() => handleFieldHold(setIndex, "restTime", set.restTime, "down")}
-                                               onPressOut={onFieldOut}>
-                                        <Text style={styles.updateBtnText}>-</Text>
-                                    </Pressable>
-                                    <Text style={styles.timeText}>{secondsToMinutes(set.restTime)}</Text>
-                                    <Pressable style={styles.updateBtn} 
-                                               onPress={() => onFieldUpdate(setIndex, "restTime", set.restTime + 1)}
-                                               onLongPress={() => handleFieldHold(setIndex, "restTime", set.restTime, "up")}
-                                               onPressOut={onFieldOut}>
-                                        <Text style={styles.updateBtnText}>+</Text>
-                                    </Pressable>
-                                </View>
+                </View>
+                {!isLastSet ? <View style={styles.incrementerContainer}>
+                    <View style={styles.sliderContainer}>
+                        <View style={styles.sliderTextBox}>
+                            <Text style={styles.adjusterText}>REST BEFORE NEXT SET</Text>
+                            <View style={styles.incrementer}>
+                                <Pressable style={styles.updateBtn}
+                                           onLongPress={() => handleFieldHold(setIndex, "restBeforeNextSet", set.restBeforeNextSet, "down")}
+                                           onPressOut={onFieldOut}
+                                           onPress={() => onFieldUpdate(setIndex, "restBeforeNextSet", set.restBeforeNextSet - 1)}>
+                                    <Text style={styles.updateBtnText}>-</Text>
+                                </Pressable>
+                                <Text style={styles.timeText}>{secondsToMinutes(set.restBeforeNextSet)}</Text>
+                                <Pressable style={styles.updateBtn}
+                                           onLongPress={() => handleFieldHold(setIndex, "restBeforeNextSet", set.restBeforeNextSet, "up")}
+                                           onPressOut={onFieldOut}
+                                           onPress={() => onFieldUpdate(setIndex, "restBeforeNextSet", set.restBeforeNextSet + 1)}>
+                                    <Text style={styles.updateBtnText}>+</Text>
+                                </Pressable>
                             </View>
                         </View>
                     </View>
-                    <View style={styles.incrementerContainer}>
-                        <View style={styles.sliderContainer}>
-                            <View style={styles.sliderTextBox}>
-                                <Text>REPS</Text>
-                                <Text style={styles.sliderText}>{set.reps}</Text>
-                            </View>
-                            <Slider
-                                style={{width: "100%"}}
-                                minimumValue={1}
-                                maximumValue={10}
-                                minimumTrackTintColor="#FFFFFF"
-                                maximumTrackTintColor="#000000"
-                                thumbTintColor="#EBB93E"
-                                value={set.reps}
-                                onValueChange={value => onFieldUpdate(setIndex, "reps", value)}
-                                onLayout={e => e.preventDefault()}
-                            />
-                        </View>
-                    </View>
-                    <View style={styles.incrementerContainer}>
-                        <View style={styles.sliderContainer}>
-                            <View style={styles.sliderTextBox}>
-                                <Text>EXTRA WEIGHT</Text>
-                                <View style={styles.incrementer}>
-                                    <Pressable style={styles.updateBtn}
-                                               onPress={() => onFieldUpdate(setIndex, "weight", set.weight - 1)}
-                                               onLongPress={() => handleFieldHold(setIndex, "weight", set.weight, "down")}
-                                               onPressOut={onFieldOut}>
-                                        <Text style={styles.updateBtnText}>-</Text>
-                                    </Pressable>
-                                    <Text style={styles.timeText}>{set.weight}lb</Text>
-                                    <Pressable style={styles.updateBtn}
-                                               onPress={() => onFieldUpdate(setIndex, "weight", set.weight + 1)}
-                                               onLongPress={() => handleFieldHold(setIndex, "weight", set.weight, "up")}
-                                               onPressOut={onFieldOut}>
-                                        <Text style={styles.updateBtnText}>+</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                    {!isLastSet ? <View style={styles.incrementerContainer}>
-                        <View style={styles.sliderContainer}>
-                            <View style={styles.sliderTextBox}>
-                                <Text>REST BEFORE NEXT SET</Text>
-                                <View style={styles.incrementer}>
-                                    <Pressable style={styles.updateBtn}
-                                               onLongPress={() => handleFieldHold(setIndex, "restBeforeNextSet", set.restBeforeNextSet, "down")}
-                                               onPressOut={onFieldOut}
-                                               onPress={() => onFieldUpdate(setIndex, "restBeforeNextSet", set.restBeforeNextSet - 1)}>
-                                        <Text style={styles.updateBtnText}>-</Text>
-                                    </Pressable>
-                                    <Text style={styles.timeText}>{secondsToMinutes(set.restBeforeNextSet)}</Text>
-                                    <Pressable style={styles.updateBtn}
-                                               onLongPress={() => handleFieldHold(setIndex, "restBeforeNextSet", set.restBeforeNextSet, "up")}
-                                               onPressOut={onFieldOut}
-                                               onPress={() => onFieldUpdate(setIndex, "restBeforeNextSet", set.restBeforeNextSet + 1)}>
-                                        <Text style={styles.updateBtnText}>+</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        </View>
-                    </View> : null}
                 </View> : null}
+            </View> : null}
         </ListItem.Accordion>
     )
 }
@@ -353,10 +367,33 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#333333'
     },
+    adjusterText: {
+      fontWeight: 'bold',
+      fontSize: 20  
+    },
+    moveSetBtn: {
+        backgroundColor: "white", 
+        width: 35, 
+        height: 35, 
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 4,
+        transform: [{rotate: "90deg"}]
+    },
+    moveSetBtnText: {
+        color: "black",
+        fontWeight: "bold"
+    },
+    moveSetBtnContainer: {
+        marginRight: 10
+    },
     incrementer: {
-        display: "flex", 
+        display: "flex",
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%"
     },
     updateBtn: {
         backgroundColor: "white",
@@ -401,14 +438,16 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
+        
     },
     sliderText: {
         marginBottom: 5,
     },
     sliderTextBox: {
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'space-between',
+        alignItems: "center",
         width: '100%',
         paddingRight: 14,
         paddingLeft: 14,

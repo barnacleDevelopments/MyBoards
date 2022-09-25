@@ -83,7 +83,7 @@ const WorkoutForm = ({
     }
 
     const updateProp = (setIndex: number, propName: string, value: string) => {
-        if (Number.parseInt(value) > 0) {
+        if (Number.parseInt(value) > 0 || (propName === "weight" && Number.parseInt(value) >= 0)) {
             setHandler((sets) => sets.map((set, i) => {
                 if (i === setIndex) {
                     set[propName] = Number.parseInt(value);
@@ -196,6 +196,29 @@ const WorkoutForm = ({
         setHandler(setListCopy);
     }
 
+    const moveSet = (setIndex: number, direction: "up" | "down") => {
+        setHandler(sets => {
+            console.log(sets)
+            switch (direction) {
+                case "up":
+                    if(sets.indexOf(sets[setIndex - 1]) < 0) break;
+                    const tmp1 = sets[setIndex];
+                    sets[setIndex] = sets[setIndex - 1]
+                    sets[setIndex - 1] = tmp1;
+                    break;
+                case "down":
+                    if(sets.indexOf(sets[setIndex + 1]) < 0) break;
+                    const tmp2 = sets[setIndex];
+                    sets[setIndex] = sets[setIndex + 1]
+                    sets[setIndex + 1] = tmp2;
+                    break;
+
+            }
+            console.log(sets)
+            return [...sets];
+        })
+    }
+
     return (
         <View style={styles.container}>
             <ScrollView>
@@ -285,6 +308,7 @@ const WorkoutForm = ({
                                         ? sets.map((s: Set, i: number) => (
                                             <SetDropownMenu
                                                 key={i}
+                                                onMove={moveSet}
                                                 hangboard={selectedBoard ?? hangboard}
                                                 onInstructionInput={handleSetInstructions}
                                                 onFieldUpdate={updateProp}
@@ -341,7 +365,7 @@ const WorkoutForm = ({
             </ScrollView>
             {(!allInstructionsValid && !isKeyboardVisible) || !isFormValid ? <View style={{
                 position: 'absolute',
-                bottom: 60,
+                bottom: 0,
                 left: 0,
                 width: '100%',
                 backgroundColor: 'red',

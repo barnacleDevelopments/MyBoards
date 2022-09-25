@@ -35,7 +35,8 @@ const CreateWorkoutScreen = ({navigation}: Props) => {
         rightGripType: 0,
         leftGripType: 0,
         indexPosition: 0,
-        setHolds: []
+        setHolds: [],
+        weight: 0
     }]);
 
     const addSet = () => {
@@ -49,7 +50,8 @@ const CreateWorkoutScreen = ({navigation}: Props) => {
             rightGripType: 0,
             leftGripType: 0,
             indexPosition: 0,
-            setHolds: []
+            setHolds: [],
+            weight: 0
         }]);
     }
 

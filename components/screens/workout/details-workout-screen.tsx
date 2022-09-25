@@ -64,12 +64,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#333333'
     },
     workoutHeader: {
-        fontSize: 30,
+        fontSize: 50,
         fontWeight: "bold",
         color: "#f5f5f5"
     },
     workoutDescription: {
-        fontSize: 20,
+        fontSize: 23,
         color: "#f5f5f5",
         marginBottom: 10
     },

@@ -91,6 +91,8 @@ const useMyBoardsAPI = () => {
             })
         }
         
+        console.log(error.response)
+        
         // refresh token expired or is invalid
         if(error.response.status === 400) {
             addError("Logged in on other device", 400);

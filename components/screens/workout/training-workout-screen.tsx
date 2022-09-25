@@ -82,6 +82,11 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                 return "INTERMISSION"
         }
     }
+    
+    const getHandLetter = (hold: Hold) => {
+        return trainer?.UISet?.setHolds
+            ?.find(sh => sh.holdId === hold.id)?.hand === 0 ? "L" : "R"
+    }
 
     const aspectRatio = imageAspectRatio(workout.hangboard?.boardWidth, workout.hangboard?.boardHeight);
 
@@ -89,7 +94,7 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
         <View style={styles.container}>
             <KeepAwake/>
             {/* Set and rep switcher */}
-            {!workoutComplete ?
+            {!workoutComplete && trainer.activeTimerName !== "WorkoutTimer" ?
                 <View style={styles.headerContainer}>
                     <View style={styles.headerChanger}>
                         {workout.sets.indexOf(trainer.UISet) !== 0 ?
@@ -155,15 +160,23 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                                         backgroundColor,
                                         top: positionPin(hold.baseUIYCoord, workout.hangboard.boardHeight, boardSize.height) - 10 || 0,
                                         left: positionPin(hold.baseUIXCoord, workout.hangboard.boardWidth, boardSize.width) - 10 || 0
-                                    }}/>
+                                    }}>
+                                        <Text style={styles.pinText}>
+                                            {getHandLetter(hold)}
+                                        </Text>
+                                    </View>
                                 )
                             })}
                         </View>
 
                         {/* Timer progress interface */}
                         <View style={styles.timerContainer}>
-                            <Text
-                                style={styles.timerText}>{trainer.UIClock?.getMinutes()}:{trainer.UIClock?.getSeconds() < 10 ? `0${trainer.UIClock?.getSeconds()}` : trainer.UIClock?.getSeconds()}</Text>
+                            {trainer.UISet?.weight ? <Text style={{color: "white", fontSize: 20}}>{trainer.UISet?.weight}LB Added</Text> : null}
+                            <Text style={styles.timerText}>
+                                {trainer.UIClock?.getMinutes()}:{trainer.UIClock?.getSeconds() < 10 ? 
+                                `0${trainer.UIClock?.getSeconds()}` : 
+                                trainer.UIClock?.getSeconds()}
+                            </Text>
                             <View style={styles.progressContainer}>
                                 <View style={styles.progressBarContainer}>
                                     {trainer.UIProgress ? <View
@@ -262,10 +275,17 @@ const styles = StyleSheet.create({
         backgroundColor: '#212121'
     },
     pin: {
-        height: 20,
-        width: 20,
+        height: 25,
+        width: 25,
         borderRadius: 50,
         position: 'absolute',
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    pinText: {
+        fontSize: 15,
+        fontWeight: "800"
     },
     boardImage: {
         position: 'relative',
