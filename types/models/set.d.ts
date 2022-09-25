@@ -16,6 +16,7 @@ export default interface Set {
     leftGripType: gripType,
     rightGripType: gripType,
     indexPosition: number,
-    setHolds?: Array<SetHold>
+    setHolds?: Array<SetHold>,
+    weight: number
 }
 

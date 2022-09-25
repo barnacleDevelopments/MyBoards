@@ -28,7 +28,7 @@ const workoutSchema = Yup.object().shape({
         .required('name is required'),
     description: Yup.string()
         .min(2, 'description must be at least 2 characters long')
-        .max(50, 'description has a maximum of 50 characters')
+        .max(100, 'description has a maximum of 50 characters')
         .required('description is required'),
 });
 

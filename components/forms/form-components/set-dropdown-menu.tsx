@@ -300,6 +300,28 @@ const SetDropownMenu = ({
                             />
                         </View>
                     </View>
+                    <View style={styles.incrementerContainer}>
+                        <View style={styles.sliderContainer}>
+                            <View style={styles.sliderTextBox}>
+                                <Text>EXTRA WEIGHT</Text>
+                                <View style={styles.incrementer}>
+                                    <Pressable style={styles.updateBtn}
+                                               onPress={() => onFieldUpdate(setIndex, "weight", set.weight - 1)}
+                                               onLongPress={() => handleFieldHold(setIndex, "weight", set.weight, "down")}
+                                               onPressOut={onFieldOut}>
+                                        <Text style={styles.updateBtnText}>-</Text>
+                                    </Pressable>
+                                    <Text style={styles.timeText}>{set.weight}lb</Text>
+                                    <Pressable style={styles.updateBtn}
+                                               onPress={() => onFieldUpdate(setIndex, "weight", set.weight + 1)}
+                                               onLongPress={() => handleFieldHold(setIndex, "weight", set.weight, "up")}
+                                               onPressOut={onFieldOut}>
+                                        <Text style={styles.updateBtnText}>+</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
                     {!isLastSet ? <View style={styles.incrementerContainer}>
                         <View style={styles.sliderContainer}>
                             <View style={styles.sliderTextBox}>
