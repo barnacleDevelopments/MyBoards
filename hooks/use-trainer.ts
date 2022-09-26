@@ -5,6 +5,7 @@ import Workout from "../types/models/workout";
 import Set from "../types/models/set";
 import Tts from 'react-native-tts';
 import {RepStack} from "../types/models/rep-stack";
+import useMyBoardsAPI from "./use-myboards-api";
 
 interface SetRef {
     set: Set
@@ -29,6 +30,7 @@ interface Trainer {
     resetWorkout: () => void,
     nextSet: () => void,
     previousSet: () => void,
+    startWorkout: () => Promise<void>
 }
 
 const useTrainer = (workout: Workout): Trainer => {
@@ -36,6 +38,7 @@ const useTrainer = (workout: Workout): Trainer => {
     const remainingReps = useRef(0);
     let currentSetIndex = useRef(0);
     const session = useRef({repLog: [], workoutId: workout.id});
+    const firstRepLogged = useRef(false);
     let bundleSound: Sound;
     let timerState;
 
@@ -52,6 +55,7 @@ const useTrainer = (workout: Workout): Trainer => {
     const [activeTimerName, setActiveTimerName] = useState<string>()
     const [UIRemainingReps, setUIRemainingReps] = useState<number>(0)
     const timerCount = useRef<number>(0);
+    const { logSession, logRepetition } = useMyBoardsAPI();
 
     /**
      *
@@ -437,15 +441,22 @@ const useTrainer = (workout: Workout): Trainer => {
      * @param RepStack object to log
      * @description Logs a rep stack object to rep log.
      */
-    const logRep = ({percentage, setIndex, setId}: RepStack) => {
+    const logRep = async ({percentage, setIndex, setId}: RepStack) => {        
         let loggedRep: LoggedRep = {
             secondsCompleted: (workout.sets[setIndex].hangTime / 100) * percentage,
             percentageCompleted: percentage,
             setId,
         }
-
-        // add rep to logged reps
         session.current.repLog = [loggedRep, ...session.current.repLog]
+        
+        if(!firstRepLogged.current) {
+            const sessionId = await logSession(session.current);
+            session.current.id = sessionId;
+            firstRepLogged.current = true;
+            return;
+        }
+        
+        await logRepetition(session.current.id, loggedRep);
     }
 
     /**

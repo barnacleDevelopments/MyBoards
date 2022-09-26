@@ -10,6 +10,7 @@ import axios from "axios";
 import {useContext} from "react";
 import useAPIError from "../hooks/use-api-error";
 import {AuthContext} from "../contexts/auth-context";
+import Session, {LoggedRep} from "../types/models/session";
 
 export enum YearFraction {
     week = 'week',
@@ -23,9 +24,9 @@ const useMyBoardsAPI = () => {
 
     // for multiple requests
     let isRefreshing = false;
-    let failedQueue: { 
+    let failedQueue: {
         resolve: (value: unknown) => void;
-        reject: (reason?: any) => void; 
+        reject: (reason?: any) => void;
     }[] = [];
 
     const processQueue = (error: unknown, token = null) => {
@@ -45,10 +46,10 @@ const useMyBoardsAPI = () => {
     }, async function (error) {
 
         const originalRequest = error.config;
-        
+
         // if request is not authorized
         if (error.response.status === 401 && !originalRequest._retry) {
-            
+
             // if in the middle of refresh use old token
             if (isRefreshing) {
                 return new Promise(function (resolve, reject) {
@@ -90,15 +91,13 @@ const useMyBoardsAPI = () => {
                     })
             })
         }
-        
-        console.log(error.response)
-        
+
         // refresh token expired or is invalid
-        if(error.response.status === 400) {
+        if (error.response.status === 400) {
             addError("Logged in on other device", 400);
             authContext.signOut();
         }
-     
+
         return Promise.reject(error);
     });
 
@@ -133,8 +132,8 @@ const useMyBoardsAPI = () => {
                 Authorization: `Bearer ${accessToken}`
             }
         });
-        
-      
+
+
         return response.data
     };
 
@@ -343,7 +342,32 @@ const useMyBoardsAPI = () => {
         return response.data;
     };
 
-// Session Routes
+    // Session Routes
+    const logSession = async (session: Session): Promise<string> => {
+        const accessToken = await AuthAPIManager.getAccessTokenAsync();
+        const URL = `${Config.API_URL}/api/Session`;
+
+        const response = await axios.post(URL, session, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        
+        return response.data.sessionId;
+    };
+    
+    const logRepetition = async (sessionId: string, rep: LoggedRep): Promise<void> => {
+        const accessToken = await AuthAPIManager.getAccessTokenAsync();
+        const URL = `${Config.API_URL}/api/Session/LogRepetition/${sessionId}`;
+        
+        await axios.post(URL, rep, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        
+        return;
+    }
 
     return {
         getWorkout,
@@ -359,7 +383,9 @@ const useMyBoardsAPI = () => {
         updateHangboard,
         deleteHangboard,
         getGripUsage,
-        getTrainingTime
+        getTrainingTime,
+        logSession,
+        logRepetition
     }
 }
 

@@ -6,21 +6,16 @@ import KeepAwake from '@sayem314/react-native-keep-awake';
 // Types
 import Workout from '../../../types/models/workout';
 import RepCompleter from '../../rep-completer';
-import Session from '../../../types/models/session';
-import {AuthAPIManager} from '../../../auth/auth_manager';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Config from "react-native-config"
 
 // Components
-import {Button, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Hold} from '../../../types/models/hangboard';
 import useTrainer from '../../../hooks/use-trainer';
-import LoadingPanel from '../../stat-panels/loading-panel';
 import {RepStack} from '../../../types/models/rep-stack';
 import DescriptionBox from '../../description-box';
 import {imageAspectRatio, positionPin} from '../../../functions/hangboard-panel';
 import {BoardDimensions} from '../../../types/board-dimensions';
-import axios from "axios";
 
 type RootStackParamList = {
     TrainingWorkoutScreen: Workout;
@@ -32,7 +27,6 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
     const workout: Workout = route.params;
     const [workoutComplete, setWorkoutComplete] = useState<boolean>(false);
     const [boardSize, setBoardSize] = useState<BoardDimensions>({width: 0, height: 0});
-    const [sessionSubmited, setSessionSubmited] = useState<boolean>(false);
     const trainer = useTrainer(workout);
 
     useEffect(() => {
@@ -42,35 +36,19 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (trainer.UIRepStack.length === 0 && workoutComplete) {
+            navigation.navigate("Dash")
+        }
+
+    }, [trainer.UIRepStack.length])
+
     const startWorkout = () => {
         trainer.startWorkout().then(() => {
             setWorkoutComplete(true)
             trainer.stopWorkout();
         });
     }
-
-    const prepareLog = () => {
-        const loggedSession: Session = trainer.getSession();
-
-        logSession(loggedSession).then(() => navigation.navigate("Dash"));
-    }
-
-    const logSession = (session: Session) =>
-        new Promise(async (resolve, reject) => {
-            if (!sessionSubmited) {
-                setSessionSubmited(true);
-                const accessToken = await AuthAPIManager.getAccessTokenAsync();
-                const URL = `${Config.API_URL}/api/Session`;
-
-                axios.post(URL, session, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                })
-                    .then(() => navigation.navigate("Dash"))
-                    .catch(err => reject(err))
-            }
-        });
 
     const displayProgressText = () => {
         switch (trainer.activeTimerName) {
@@ -82,13 +60,16 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                 return "INTERMISSION"
         }
     }
-    
+
     const getHandLetter = (hold: Hold) => {
         return trainer?.UISet?.setHolds
             ?.find(sh => sh.holdId === hold.id)?.hand === 0 ? "L" : "R"
     }
 
     const aspectRatio = imageAspectRatio(workout.hangboard?.boardWidth, workout.hangboard?.boardHeight);
+    
+    const pinList = workout.hangboard.holds.filter((hold: Hold, i: number) => 
+            trainer?.UISet?.setHolds?.map(setHold => setHold?.hold?.id).includes(hold.id))
 
     return (
         <View style={styles.container}>
@@ -143,38 +124,32 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                             style={{
                                 width: "100%",
                                 borderRadius: 5,
-                            }}
-                        >
+                            }}>
                             <Image
                                 source={{uri: workout.hangboard.imageURL}}
                                 style={{...styles.boardImage, aspectRatio}}/>
-                            {workout.hangboard.holds.map((hold: Hold, i: number) => {
-                                // hightlight only the set's holds
-                                const backgroundColor = trainer.UISet?.setHolds ? (trainer.UISet.setHolds
-                                    .map(setHold => setHold.hold.id)
-                                    .includes(hold.id) ? "#EBB93E" : '#FF000000') : '#FF000080'
-
-                                return (
-                                    <View key={i} style={{
-                                        ...styles.pin,
-                                        backgroundColor,
-                                        top: positionPin(hold.baseUIYCoord, workout.hangboard.boardHeight, boardSize.height) - 10 || 0,
-                                        left: positionPin(hold.baseUIXCoord, workout.hangboard.boardWidth, boardSize.width) - 10 || 0
-                                    }}>
-                                        <Text style={styles.pinText}>
-                                            {getHandLetter(hold)}
-                                        </Text>
-                                    </View>
-                                )
-                            })}
+                            {pinList.map((hold, i) => (
+                                <View key={i} style={{
+                                    ...styles.pin,
+                                    backgroundColor: "#EBB93E",
+                                    top: positionPin(hold.baseUIYCoord, workout.hangboard.boardHeight, boardSize.height) - 10 || 0,
+                                    left: positionPin(hold.baseUIXCoord, workout.hangboard.boardWidth, boardSize.width) - 10 || 0
+                                }}>
+                                    {<Text style={styles.pinText}>
+                                        {getHandLetter(hold)}
+                                    </Text>}
+                                </View>
+                            ))}
                         </View>
 
                         {/* Timer progress interface */}
                         <View style={styles.timerContainer}>
-                            {trainer.UISet?.weight ? <Text style={{color: "white", fontSize: 20}}>{trainer.UISet?.weight}LB Added</Text> : null}
+                            {trainer.UISet?.weight ?
+                                <Text style={{color: "white", fontSize: 20}}>{trainer.UISet?.weight}LB
+                                    Added</Text> : null}
                             <Text style={styles.timerText}>
-                                {trainer.UIClock?.getMinutes()}:{trainer.UIClock?.getSeconds() < 10 ? 
-                                `0${trainer.UIClock?.getSeconds()}` : 
+                                {trainer.UIClock?.getMinutes()}:{trainer.UIClock?.getSeconds() < 10 ?
+                                `0${trainer.UIClock?.getSeconds()}` :
                                 trainer.UIClock?.getSeconds()}
                             </Text>
                             <View style={styles.progressContainer}>
@@ -191,15 +166,13 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                             </View>
                         </View>
                     </View> : null}
-
                 {trainer.activeTimerName === "CountdownTimer" || trainer.activeTimerName === "RestTimer" && trainer.UIProgress || workoutComplete ?
                     <View style={{padding: 15, width: '100%'}}>
-                        {workoutComplete && !sessionSubmited ?
+                        {workoutComplete ?
                             <DescriptionBox
                                 header="Congrats you've reached the end"
-                                text='If you have any remaing reps to confirm
-                                      they will apear here. Otherwise, log your 
-                                      workout to complete your session.'/>
+                                text='If you have any remaining reps to confirm
+                                      they will appear here. '/>
                             : null}
                         {trainer.UIRepStack.map((rs: RepStack, i) => (
                             <RepCompleter
@@ -212,58 +185,41 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                         ))}
                     </View>
                     : null}
-                {trainer.UIRepStack.length <= 0 && workoutComplete ?
-                    <Text style={styles.recordRepsText}>All reps are confirmed. To finish press the button
-                        bellow.</Text>
-                    : null}
             </ScrollView>
             <View>
-                {
-                    workoutComplete && !sessionSubmited ?
-                        <Button
-                            title="Prepare Log"
-                            disabled={trainer.UIRepStack.length > 0}
-                            onPress={prepareLog}
-                            color="#EBB93E"
-                        />
+                {!workoutComplete ? <View style={styles.timerControlsContainer}>
+                    {/* Timer Controls */}
+                    {trainer.UITimerState ?
+                        <View style={{flex: 1, height: 80}}>
+                            <TouchableOpacity style={styles.pauseBtn} onPress={trainer.pauseWorkout}>
+                                <Text style={styles.timerBtnText}>PAUSE</Text>
+                            </TouchableOpacity>
+                        </View>
                         :
-                        !sessionSubmited ?
-                            <View style={styles.timerControlsContainer}>
-                                {/* Timer Controls */}
-                                {trainer.UITimerState ?
-                                    <View style={{flex: 1, height: 80}}>
-                                        <TouchableOpacity style={styles.pauseBtn} onPress={trainer.pauseWorkout}>
-                                            <Text style={styles.timerBtnText}>PAUSE</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                    :
-                                    <View style={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        width: "100%",
-                                        height: 80
-                                    }}>
-                                        <View style={{flex: 2}}>
-                                            <TouchableOpacity style={styles.resumeBtn} onPress={trainer.resumeWorkout}>
-                                                <Text style={styles.timerBtnText}>RESUME</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                        <View style={{flex: 1}}>
-                                            <TouchableOpacity style={styles.stopBtn}
-                                                              onPress={() => navigation.navigate("Workouts")}>
-                                                <Text style={styles.timerBtnText}>STOP</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity style={styles.resetBtn} onPress={trainer.resetWorkout}>
-                                                <Text style={styles.timerBtnText}>RESET</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                }
+                        <View style={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            width: "100%",
+                            height: 80
+                        }}>
+                            <View style={{flex: 2}}>
+                                <TouchableOpacity style={styles.resumeBtn} onPress={trainer.resumeWorkout}>
+                                    <Text style={styles.timerBtnText}>RESUME</Text>
+                                </TouchableOpacity>
                             </View>
-                            :
-                            <LoadingPanel/>
-                }
+                            <View style={{flex: 1}}>
+                                <TouchableOpacity style={styles.stopBtn}
+                                                  onPress={() => navigation.navigate("Workouts")}>
+                                    <Text style={styles.timerBtnText}>STOP</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.resetBtn} onPress={trainer.resetWorkout}>
+                                    <Text style={styles.timerBtnText}>RESET</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    }
+                </View> : null}
             </View>
         </View>
     )

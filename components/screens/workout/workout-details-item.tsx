@@ -10,7 +10,6 @@ const WorkoutDetailsItem = ({set}) => {
         return `${set.setHolds[holdIndex].hold.depthMM}mm - ${set.setHolds[holdIndex]?.hand === 0 ? "Left Hand" : "Right Hand"}`  
     }
     
-    
     return (
         <ListItem
             style={styles.container}
