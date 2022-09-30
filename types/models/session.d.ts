@@ -6,6 +6,7 @@ export interface LoggedRep {
 }
 
 export default interface Session {
+    id: number,
     totalHangSeconds: number,
     dateCompleted: Date,
     workoutId: string,

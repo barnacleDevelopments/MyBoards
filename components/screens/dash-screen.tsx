@@ -10,6 +10,8 @@ import GripUsagePanel from '../stat-panels/grip-usage-panel';
 import SecondsHangedPanel from '../stat-panels/seconds-hanged-panel';
 import PrimaryButton from "../buttons/primary-btn";
 import {UserContext} from "../../contexts/user-context";
+import SecondaryButton from "../buttons/secondary-btn";
+import {useNavigation} from "@react-navigation/native";
 
 type RootStackParamList = {
     DashScreen: {};
@@ -30,6 +32,11 @@ const DashScreen = ({navigation}: Props) => {
         <View style={{height: "100%", paddingTop: 10, backgroundColor: '#212021'}}>
             <ScrollView style={globalStyles.scrollContainer}>
                 <Text style={{color: 'white', textAlign: 'center', fontSize: 50}}>{greeting}</Text>
+                <View style={{marginTop: 10, marginBottom: 10}}>
+                    <SecondaryButton title="View Session Logs" 
+                                     color='#EBB93E'
+                                     onPress={() => navigation.navigate("SessionsGroups")}/>
+                </View>
                 <SecondsHangedPanel/>
                 <DailyTrainPanel/>
                 <GripUsagePanel/>

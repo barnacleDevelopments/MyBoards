@@ -344,6 +344,48 @@ const useMyBoardsAPI = () => {
     };
 
     // Session Routes
+    const getGroupedSessionsByMonth = async (year: number): Promise<{month: string, year: number, sessions: Session[]}[]> => {
+        const accessToken = await AuthAPIManager.getAccessTokenAsync();
+        const URL = `${Config.API_URL}/api/Session/GroupedByMonth/${year}`;
+
+        const response = await axios.get(URL, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        return response.data;
+    }
+    
+    const getSessionsByMonth = async (month: number): Promise<Session[]> => {
+        const accessToken = await AuthAPIManager.getAccessTokenAsync();
+        const URL = `${Config.API_URL}/api/Session/Month/${month}`;
+        
+        const response = await axios.get(URL, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        
+        console.log("WHATUP!")
+        
+        return response.data;
+    }
+
+    const getSessionById = async (id: number): Promise<Session> => {
+        const accessToken = await AuthAPIManager.getAccessTokenAsync();
+        const URL = `${Config.API_URL}/api/Session/${id}`;
+
+        const response = await axios.get(URL, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        return response.data;
+    }
+    
+    
     const logSession = async (session: Session): Promise<string> => {
         const accessToken = await AuthAPIManager.getAccessTokenAsync();
         const URL = `${Config.API_URL}/api/Session`;
@@ -386,7 +428,10 @@ const useMyBoardsAPI = () => {
         getGripUsage,
         getTrainingTime,
         logSession,
-        logRepetition
+        logRepetition,
+        getSessionsByMonth,
+        getGroupedSessionsByMonth,
+        getSessionById
     }
 }
 

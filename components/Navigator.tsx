@@ -13,6 +13,9 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {AuthContext} from "../contexts/auth-context";
 import PasswordResetScreen from "./screens/auth/password-reset-screen";
 import ResendEmailConfirmationScreen from "./screens/auth/resend-email-confirmation-screen";
+import SessionGroupScreen from "./screens/session/session-groups-screen";
+import SessionsScreen from "./screens/session/sessions-screen";
+import SessionScreen from "./screens/session/session-screen";
 
 type RootStackParamList = {};
 
@@ -65,6 +68,18 @@ const Navigator = () => {
             <Stack.Group
                 screenOptions={{presentation: 'modal'}}
             >
+                <Stack.Screen name="SessionsGroups" 
+                    options={{...navigationStyle}}
+                              component={SessionGroupScreen}
+                />
+                <Stack.Screen name="Sessions"
+                              options={{...navigationStyle}}
+                              component={SessionsScreen}
+                />
+                <Stack.Screen name="Session"
+                              options={{...navigationStyle}}
+                              component={SessionScreen}
+                />
                 <Stack.Screen
                     options={{...navigationStyle}}
                     name="Create Workout"
