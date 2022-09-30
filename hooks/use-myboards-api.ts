@@ -42,9 +42,10 @@ const useMyBoardsAPI = () => {
     }
 
     axios.interceptors.response.use(async function (response) {
+        
         return response;
     }, async function (error) {
-
+        console.log(error.response)
         const originalRequest = error.config;
 
         // if request is not authorized

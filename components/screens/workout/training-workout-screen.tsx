@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 // Hooks
 import KeepAwake from '@sayem314/react-native-keep-awake';
@@ -28,6 +28,7 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
     const [workoutComplete, setWorkoutComplete] = useState<boolean>(false);
     const [boardSize, setBoardSize] = useState<BoardDimensions>({width: 0, height: 0});
     const trainer = useTrainer(workout);
+    const scrollViewRef = useRef();
 
     useEffect(() => {
         startWorkout();
@@ -35,13 +36,25 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
             trainer.stopWorkout();
         };
     }, []);
+    
+    useEffect(() => {
+        if(trainer.activeTimerName === "RestTimer") {
+            scrollBottom();
+        }
+    }, [trainer.activeTimerName]);
 
     useEffect(() => {
         if (trainer.UIRepStack.length === 0 && workoutComplete) {
             navigation.navigate("Dash")
         }
 
-    }, [trainer.UIRepStack.length])
+    }, [trainer.UIRepStack.length]);
+    
+    const scrollBottom = () => {
+        scrollViewRef.current.scrollToEnd({
+            animated: true
+        })
+    }
 
     const startWorkout = () => {
         trainer.startWorkout().then(() => {
@@ -65,11 +78,19 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
         return trainer?.UISet?.setHolds
             ?.find(sh => sh.holdId === hold.id)?.hand === 0 ? "L" : "R"
     }
+    
+    const logRep = (data) => {
+        scrollViewRef.current.scrollTo({
+            y: 0,
+            animated: true
+        })
+        trainer.setUIRepStack(data);
+    }
 
     const aspectRatio = imageAspectRatio(workout.hangboard?.boardWidth, workout.hangboard?.boardHeight);
     
     const pinList = workout.hangboard.holds.filter((hold: Hold, i: number) => 
-            trainer?.UISet?.setHolds?.map(setHold => setHold?.hold?.id).includes(hold.id))
+            trainer?.UISet?.setHolds?.map(setHold => setHold?.hold?.id).includes(hold.id));
 
     return (
         <View style={styles.container}>
@@ -115,7 +136,7 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                 </View>
                 : null}
 
-            <ScrollView contentContainerStyle={styles.bodyContainer}>
+            <ScrollView ref={scrollViewRef} contentContainerStyle={styles.bodyContainer}>
                 {/* Hangboard interface  */}
                 {!workoutComplete ?
                     <View style={styles.timerContainer}>
@@ -143,15 +164,15 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                         </View>
 
                         {/* Timer progress interface */}
-                        <View style={styles.timerContainer}>
+                        <View style={styles.timerBox}>
                             {trainer.UISet?.weight ?
                                 <Text style={{color: "white", fontSize: 20}}>{trainer.UISet?.weight}LB
                                     Added</Text> : null}
-                            <Text style={styles.timerText}>
+                            {trainer.UIRepStack.length === 0 ? <Text style={styles.timerText}>
                                 {trainer.UIClock?.getMinutes()}:{trainer.UIClock?.getSeconds() < 10 ?
                                 `0${trainer.UIClock?.getSeconds()}` :
                                 trainer.UIClock?.getSeconds()}
-                            </Text>
+                            </Text> : null}
                             <View style={styles.progressContainer}>
                                 <View style={styles.progressBarContainer}>
                                     {trainer.UIProgress ? <View
@@ -166,8 +187,7 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                             </View>
                         </View>
                     </View> : null}
-                {trainer.activeTimerName === "CountdownTimer" || trainer.activeTimerName === "RestTimer" && trainer.UIProgress || workoutComplete ?
-                    <View style={{padding: 15, width: '100%'}}>
+                    <View style={{ width: '100%'}}>
                         {workoutComplete ?
                             <DescriptionBox
                                 header="Congrats you've reached the end"
@@ -178,13 +198,11 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                             <RepCompleter
                                 key={i}
                                 index={i}
-                                onSelection={trainer.setUIRepStack}
+                                onSelection={logRep}
                                 repLogger={trainer.logRep}
-                                repStack={rs}
-                            />
+                                repStack={rs} />
                         ))}
                     </View>
-                    : null}
             </ScrollView>
             <View>
                 {!workoutComplete ? <View style={styles.timerControlsContainer}>
@@ -248,8 +266,18 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
         width: "100%"
     },
-    timerContainer: {
+    boardContainier: {
+      
+    },
+    timerBox: {
         marginTop: 15,
+        width: "100%",
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        alignItems: 'center'
+    },
+    timerContainer: {
         width: "100%",
         display: 'flex',
         justifyContent: 'center',
@@ -330,7 +358,6 @@ const styles = StyleSheet.create({
     },
     progressText: {
         fontSize: 20,
-        marginBottom: 15,
         marginTop: 15,
         color: '#f5f5f5'
     },
