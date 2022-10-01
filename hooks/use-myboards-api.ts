@@ -367,8 +367,6 @@ const useMyBoardsAPI = () => {
             }
         });
         
-        console.log("WHATUP!")
-        
         return response.data;
     }
 
