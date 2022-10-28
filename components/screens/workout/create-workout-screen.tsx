@@ -15,7 +15,7 @@ import useMyBoardsAPI from '../../../hooks/use-myboards-api';
 
 // HOOKS
 
-type RootStackParamList = {
+export type RootStackParamList = {
     CreateWorkoutScreen: {};
 }
 

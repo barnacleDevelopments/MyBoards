@@ -26,13 +26,16 @@ import useAPIError from '../../../hooks/use-api-error';
 import useMyBoardsAPI from '../../../hooks/use-myboards-api';
 import {useFocusEffect} from '@react-navigation/native';
 
+import { NavigatorScreenParams } from '@react-navigation/native';
+
 type RootStackParamList = {
-    data: Workout;
+    WorkoutsScreen: {},
+    "Create Workout": NavigatorScreenParams<StackParamList>
 }
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WorkoutsScreen'>;
 
-const WorkoutsScreen = ({navigation, route}: Props) => {
+const WorkoutsScreen: React.FC<Props> = ({navigation }) => {
     const [workouts, setWorkouts] = useState<Array<Workout>>([]);
     const [loading, setLoading] = useState(true);
     const netInfo = useNetInfo();
@@ -40,14 +43,12 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
     const {addError, error} = useAPIError();
     const {getHangboardCount, getWorkouts} = useMyBoardsAPI();
     const {user, updateUser} = useContext(UserContext);
-    const [isFirstWorkout, setIsFirstWorkout] = useState(false);
     const [hasHangboards, setHasHangboards] = useState(false);
 
       useFocusEffect(
         React.useCallback(() => {
             (async () => {
                 await updateUser();
-                setIsFirstWorkout(!user?.hasCreatedFirstWorkout && hangboardCount > 0)
         
                 try {
                     const result = Number.parseInt(await getHangboardCount());
@@ -57,13 +58,9 @@ const WorkoutsScreen = ({navigation, route}: Props) => {
                         setLoading(false);
                         return;
                     }
-
                     const workouts = await getWorkouts();
-                    
                     setWorkouts(workouts);
-
                     setLoading(false);
-
                 } catch (ex: any) {
                     addError(`ERROR RETRIEVING WORKOUTS. PLEASE TRY AGAIN.`, ex.status);
                 }

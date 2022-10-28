@@ -4,8 +4,18 @@ import {useFocusEffect} from "@react-navigation/native";
 import useMyBoardsAPI from "../../../hooks/use-myboards-api";
 import Session from "../../../types/models/session";
 import globalStyles from "../../../styles/global";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
+import PrimaryButton from "../../buttons/primary-btn";
 
-const SessionScreen = ({route}) => {
+type RootStackParamList = {
+    SessionScreen: { 
+        id: number
+    };
+}
+
+type Props = NativeStackScreenProps<RootStackParamList, 'SessionScreen'>;
+
+const SessionScreen: React.FC<Props> = ({route}) => {
     const {getSessionById} = useMyBoardsAPI();
     const [session, setSession] = useState<Session>();
 
@@ -22,39 +32,24 @@ const SessionScreen = ({route}) => {
     const date = new Date(session?.dateCompleted);
     
     return (
-        <ScrollView style={{backgroundColor: "#333333", paddingLeft: 10, paddingRight: 10}}>
+        <ScrollView style={styles.container}>
             <View>
                 <Text style={globalStyles.pageHeading}>{mS[date?.getMonth()]} {date.getDay()}</Text>
-                <Text>Overview</Text>
+                <Text style={{color: 'white', textAlign: 'center', fontSize: 25}}>
+                    Overview
+                </Text>
+                <PrimaryButton title='DELETE' color={"red"} />
             </View>
         </ScrollView>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 10,
-        marginBottom: 10,
-        padding: 10,
-        display: "flex",
-        flexDirection: 'row',
-        backgroundColor: "#212021",
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: 20,
-        paddingRight: 20,
-        width: '100%',
-        borderRadius: 4,
-        paddingBottom: 15
-    },
-    title: {
-        color: 'white',
-        fontSize: 40
-    },
-    sessionCount: {
-        color: 'white',
-        fontSize: 25
+        backgroundColor: "#333333", 
+        paddingLeft: 10, 
+        paddingRight: 10
     }
-})
+});
 
 export default SessionScreen;

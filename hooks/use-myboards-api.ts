@@ -107,7 +107,7 @@ const useMyBoardsAPI = () => {
      * @param workoutId the ID of the workout to retrieve.
      * @returns one workout.
      */
-    const getWorkout = async (workoutId: string): Promise<Workout> => {
+    const getWorkout = async (workoutId: number): Promise<Workout> => {
         const accessToken = await AuthAPIManager.getAccessTokenAsync();
         const URL = `${Config.API_URL}/api/workout/${workoutId}`;
 

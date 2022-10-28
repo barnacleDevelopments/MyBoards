@@ -17,7 +17,24 @@ import SessionGroupScreen from "./screens/session/session-groups-screen";
 import SessionsScreen from "./screens/session/sessions-screen";
 import SessionScreen from "./screens/session/session-screen";
 
-type RootStackParamList = {};
+type RootStackParamList = {
+    Dash: {},
+    Loading: {},
+    SignIn: {},
+    Main: {},
+    "Password Reset": {},
+    "Email Confirmation": {},
+    SessionsGroups: {},
+    Sessions: {},
+    Session: {},
+    "Create Workout": {},
+    "Create Hangboard": {},
+    "Edit Hangboard": {}
+    "Configure Hangboard": {},
+    "Details": {},
+    "TrainingWorkoutScreen":{},
+    "Edit Workout": {}
+};
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -35,7 +52,7 @@ const Navigator = () => {
     }
     
     return (
-        <Stack.Navigator>
+        <Stack.Navigator initialRouteName="Dash">
             <Stack.Group>
                 {state.isLoading ? (
                     <Stack.Screen

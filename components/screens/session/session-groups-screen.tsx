@@ -24,7 +24,7 @@ const SessionGroupScreen = () => {
         <ScrollView style={{backgroundColor: "#333333", paddingLeft: 10, paddingRight: 10}}>
             {sessionGroups?.map(sg => {
               return (
-                  <Pressable onPress={() => navigation.navigate("Sessions", {month: sg.month})} style={styles.container}>
+                  <Pressable key={sg.year} onPress={() => navigation.navigate("Sessions", {month: sg.month})} style={styles.container}>
                       <View style={styles.header}>
                           <Text style={styles.title}>
                               {mS[sg.month - 1]} 
@@ -46,21 +46,6 @@ const SessionGroupScreen = () => {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        marginTop: 10,
-        marginBottom: 10,
-        padding: 10,
-        display: "flex",
-        flexDirection: 'row',
-        backgroundColor: "#212021",
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: 20,
-        paddingRight: 20,
-        width: '100%',
-        borderRadius: 4,
-        paddingBottom: 15
-    },
     header: {
       display: 'flex',
       flexDirection: 'row',

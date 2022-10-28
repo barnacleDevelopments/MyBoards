@@ -88,9 +88,9 @@ const CreateHangboardScreen = ({navigation, route}: Props) => {
                 body.append("hangboard", JSON.stringify(hangboardContent));
 
                 try {
-                    await createHangboard(body)
+                    await createHangboard(body);
                 } catch (ex: any) {
-                    addError("ERROR CREATING HANGBOARD. PLEASE TRY AGAIN.", ex.status)
+                    addError(`ERROR CREATING HANGBOARD. PLEASE TRY AGAIN ${JSON.stringify(ex)}`, ex.status)
                 } finally {
                     navigation.navigate("Hangboards");
                 }

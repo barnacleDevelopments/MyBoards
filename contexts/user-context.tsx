@@ -32,8 +32,12 @@ export default function UserProvider({children}) {
     }
     
     useEffect(() => {
-        getUser()
-    }, [])
+        (async() => {
+            if(!user) {
+                await getUser()
+            }
+        })()
+    }, [user])
 
     return (
         <UserContext.Provider value={contextValue}>

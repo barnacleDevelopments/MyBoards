@@ -76,7 +76,7 @@ const WorkoutForm = ({
     useEffect(() => {
         setHoldsSelected(false)
         validateHolds();
-    }, [sets])
+    }, [sets]);
 
     const validateHolds = () => {
         setHoldsSelected(sets.some(s => s?.setHolds?.length < 1));

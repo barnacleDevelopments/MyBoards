@@ -3,8 +3,17 @@ import { ScrollView, StyleSheet, Pressable, Text} from "react-native";
 import {useFocusEffect, useNavigation} from "@react-navigation/native";
 import useMyBoardsAPI from "../../../hooks/use-myboards-api";
 import Session from "../../../types/models/session";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
 
-const SessionsScreen = ({route}) => {
+type RootStackParamList = {
+    SessionsScreen: {
+        month: number
+    };
+}
+
+type Props = NativeStackScreenProps<RootStackParamList, 'SessionsScreen'>;
+
+const SessionsScreen: React.FC<Props> = ({route}) => {
     const {getSessionsByMonth} = useMyBoardsAPI();
     const [sessions, setSessions] = useState<Session[]>();
     const navigation = useNavigation();
@@ -25,13 +34,13 @@ const SessionsScreen = ({route}) => {
             {sessions?.map(s => {
                 const date = new Date(s.dateCompleted)
                 return (
-                    <Pressable onPress={() => navigation.navigate("Session", {id: s.id})} 
+                    <Pressable key={s.id} onPress={() => navigation.navigate("Session", {id: s.id})} 
                                style={styles.container}>
                         <Text style={{color:"white"}}> 
                             {date.getDay()} / {date.getMonth()} / {date.getFullYear()}
                         </Text>
                     </Pressable>
-                )
+                );
             })}
         </ScrollView>
     )

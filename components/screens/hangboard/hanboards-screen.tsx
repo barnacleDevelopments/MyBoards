@@ -21,6 +21,7 @@ import useAPIError from '../../../hooks/use-api-error';
 import PrimaryButton from "../../buttons/primary-btn";
 import {UserContext} from "../../../contexts/user-context";
 import useMyBoardsAPI from "../../../hooks/use-myboards-api";
+import APIErrorNotification from "../../error-notification";
 
 type RootStackParamList = {
     HangboardScreen: {
@@ -38,8 +39,7 @@ const HangboardScreen = ({navigation}: Props) => {
     const [editWarning, setEditWarning] = useState<boolean>(false);
     const [selectedHangboardId, setSelectedHangboardId] = useState<number>();
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<{ status: boolean, message: string }>({status: false, message: ''});
-    const {addError} = useAPIError();
+    const {addError, error} = useAPIError();
     const {getAllHangboards, deleteHangboard} = useMyBoardsAPI();
     const {user, updateUser} = useContext(UserContext)
 
@@ -68,25 +68,16 @@ const HangboardScreen = ({navigation}: Props) => {
                 setHangboards(hangboards => hangboards.filter(h => h.id !== result));
 
             } catch (ex) {
-                setError(error)
+                addError("ERROR DELETING HANGBOARD. PLEASE TRY AGAIN.", ex.response)
             } finally {
                 setDeleteWarning(false);
             }
         }
     }
 
-    const handleErrorConfirm = () => {
-        setError({status: false, message: ""});
-        navigation.setParams({error: {status: false, message: ""}});
-    }
-
     return (
         <View style={{...globalStyles.container}}>
-            {/* Display error if error exists */}
-            {error.status ?
-                <ErrorMessage
-                    message={error.message}
-                    onClose={handleErrorConfirm}/> : null}
+            {error ? <APIErrorNotification/> : null}
 
             {deleteWarning ?
                 <Warning

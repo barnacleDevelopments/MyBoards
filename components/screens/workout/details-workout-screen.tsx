@@ -10,8 +10,17 @@ import LoadingPanel from '../../stat-panels/loading-panel';
 // HOOKS
 import useAPIError from '../../../hooks/use-api-error';
 import useMyBoardsAPI from "../../../hooks/use-myboards-api";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
 
-const DetailsWorkoutScreen = ({navigation, route}) => {
+type RootStackParamList = {
+    DetailsWorkoutScreen: {
+        id: number
+    }
+}
+
+type Props = NativeStackScreenProps<RootStackParamList, 'DetailsWorkoutScreen'>;
+
+const DetailsWorkoutScreen: React.FC<Props> = ({navigation, route}) => {
     const [workout, setWorkout] = useState<Workout>();
     const {addError} = useAPIError();
     const {getWorkout} = useMyBoardsAPI();
