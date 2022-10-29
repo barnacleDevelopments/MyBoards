@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react"
+import React, {memo, useEffect, useState} from "react"
 import {Button, Pressable, StyleSheet, Text, View} from "react-native"
 import {RepStack} from "./screens/workout/training-workout-screen";
 import globalStyles from "../styles/global";
@@ -6,7 +6,7 @@ import globalStyles from "../styles/global";
 interface RepCompleterProps {
     onSelection: React.Dispatch<React.SetStateAction<RepStack[]>>,
     repStack: RepStack,
-    repLogger: (rep: RepStack) => void,
+    onLog: (rep: RepStack) => void,
     index: number
 }
 
@@ -18,12 +18,14 @@ const LogButton = ({onPress, disabled, title, color}: {onPress: () => void, disa
                        backgroundColor: color,
                        padding: 15,
                        flex: 1,
-                       borderRadius: 4
+                       borderRadius: 4,
+               
                     }}>
             <Text style={{
                 color: "white",
                 fontSize: 15,
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                textAlign: 'center'
             }}>
                 {title}
             </Text>
@@ -31,29 +33,30 @@ const LogButton = ({onPress, disabled, title, color}: {onPress: () => void, disa
     )
 }
 
-const RepCompleter = ({onSelection, repStack, repLogger, index}: RepCompleterProps) => {
+const RepCompleter = memo(({onSelection, repStack, onLog, index}: RepCompleterProps) => {
     const [inProgress, setInProgress] = useState(false);
     const [autoLogProgress, setAutoLogProgress] = useState(100);
     
     useEffect(() => {
-        const timer = setInterval(() => {
+        const timer = setInterval(async () => {
             setAutoLogProgress((alp) => {
-                if(alp === 0) {
-                    clearInterval(timer);
-                    completeRep(100);
-                }
-                return alp - 1
+                (async () => {
+                    if(alp === 0) {
+                        clearInterval(timer);
+                        await completeRep(100);
+                    }
+                })()
+                  
+                    return alp - 1
             });
-        }, 300)
+        }, 300);
     }, []);
 
     const completeRep = async (percentage: number) => {
         setInProgress(true);
         // send rep log to backend
-        await repLogger({...repStack, percentage});
+        await onLog({...repStack, percentage});
         setInProgress(false);
-        // remove the rep logger element from page after selection.
-        onSelection(rs => rs.filter(r => r.repIndex !== repStack.repIndex));
     }
 
     return (
@@ -78,35 +81,33 @@ const RepCompleter = ({onSelection, repStack, repLogger, index}: RepCompleterPro
                         <View style={{display: 'flex', flexDirection: 'row', justifyContent: "center", marginBottom: 15}}>
                             <View style={{marginLeft: 10}}>
                                 <LogButton title='70%'
-                                           onPress={() => completeRep(70)}
+                                           onPress={async () => await completeRep(70)}
                                            disabled={index !== 0}
                                            color="#454545" />
                             </View>
                             <View style={{marginLeft: 10}}>
                                 <LogButton  title='80%'
-                                            onPress={() => completeRep(80)}
+                                            onPress={async () => await completeRep(80)}
                                            disabled={index !== 0}
                                            color="#6D6D6D"/>
                             </View>
                             <View style={{marginLeft: 10}}>
                                 <LogButton  title='90%'
-                                            onPress={() => completeRep(90)}
+                                            onPress={async () => await completeRep(90)}
                                             disabled={index !== 0}
                                             color="#7D7D7D"/>
                             </View>
-                            <View style={{marginLeft: 10}}>
-                                <LogButton  title='COMPLETED'
-                                            onPress={() => completeRep(100)}
-                                            disabled={index !== 0}
-                                            color="green"/>
-                            </View>
                         </View>
-                        <View style={{display: 'flex', flexDirection: 'row', justifyContent: "center"}}>
-                            <Pressable style={{backgroundColor: 'red', padding: 10, paddingTop: 15, paddingBottom: 15, borderRadius: 4, width: '100%'}} onPress={() => completeRep(0)} >
+                        <View style={{display: 'flex', flexDirection: 'column', justifyContent: "center"}}>
+                            <Pressable style={{backgroundColor: 'red', padding: 10, paddingTop: 15,marginBottom: 10,  paddingBottom: 15, borderRadius: 4, width: '100%'}} onPress={() => completeRep(0)} >
                                 <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center'}}>
                                     NOT COMPLETE
                                 </Text>
                             </Pressable>
+                            <LogButton  title='COMPLETED'
+                                        onPress={async () => await completeRep(100)}
+                                        disabled={index !== 0}
+                                        color="green"/>
                         </View>
                     </View>
                     :
@@ -117,7 +118,7 @@ const RepCompleter = ({onSelection, repStack, repLogger, index}: RepCompleterPro
             </View>
         </View>
     )
-}
+})
 
 const styles = StyleSheet.create({
     container: {

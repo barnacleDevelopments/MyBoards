@@ -199,7 +199,7 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                                 key={i}
                                 index={i}
                                 onSelection={logRep}
-                                repLogger={trainer.logRep}
+                                onLog={trainer.logRep}
                                 repStack={rs} />
                         ))}
                     </View>
