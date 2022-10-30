@@ -95,7 +95,7 @@ const useMyBoardsAPI = () => {
 
         // refresh token expired or is invalid
         if (error.response.status === 400) {
-            addError("Logged in on other device", 400);
+            addError("Issue with authorization. Please login again.", 400);
             authContext.signOut();
         }
 

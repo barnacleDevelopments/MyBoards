@@ -31,7 +31,7 @@ interface Trainer {
 
 const useTrainer = (workout: Workout): Trainer => {
 
-    let bundleSound: Sound;
+    let bundleSound = useRef<Sound>();
     let timerState;
 
     const remainingReps = useRef(0);
@@ -60,6 +60,7 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description starts the workout timer
      */
     const startWorkout = async () => {
+        await setAudioFromBundle("beep_tone.mp3");
         return new Promise(async (resolve) => {
             setUIColor('#b4b1ac');
             currentSet.current = workout.sets[0];
@@ -79,7 +80,6 @@ const useTrainer = (workout: Workout): Trainer => {
 
             // begin workout countdown
             await startCountdown()
-
             await playText("hang")
             timerState = true;
             timerCount.current = currentSet.current?.hangTime ?? 0;
@@ -90,8 +90,8 @@ const useTrainer = (workout: Workout): Trainer => {
     /**
      * @description pauses the workout state
      */
-    const pauseWorkout = () => {
-        stopWorkout()
+    const pauseWorkout = async () => {
+        await stopWorkout()
         setUITimerState(false)
     }
 
@@ -99,7 +99,7 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description resumes the workout at current state
      */
     const resumeWorkout = async () => {
-        stopSound();
+        await stopSound();
         setUITimerState(true)
         switch (activeTimerName) {
             case "WorkoutTimer":
@@ -122,10 +122,10 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description resets the workout to begining state
      */
     const resetWorkout = async () => {
-        stopSound();
+        await stopSound();
         setUITimerState(true)
         setUIRemainingReps(0);
-        stopWorkout();
+        await stopWorkout();
         await startWorkout();
         setUIRepStack([]);
     }
@@ -135,12 +135,12 @@ const useTrainer = (workout: Workout): Trainer => {
      */
     const nextSet = async () => {
         setUITimerState(true)
-        stopSound();
+        await stopSound();
 
         if (currentSetIndex.current !== workout.sets.length - 1) {
             setUIRemainingReps(0);
             remainingReps.current = 0;
-            stopWorkout();
+            await stopWorkout();
             setUIColor('#b4b1ac');
             setActiveTimerName("CountdownTimer");
             timerCount.current = 10;
@@ -150,7 +150,6 @@ const useTrainer = (workout: Workout): Trainer => {
             remainingReps.current = currentSet.current.reps;
             await startCountdown()
             timerCount.current = currentSet.current?.hangTime ?? 0;
-            await logRep({percentage: 100, setIndex: currentSetIndex.current, setId: currentSet.current?.id})
             await startWork()
         }
     }
@@ -160,11 +159,11 @@ const useTrainer = (workout: Workout): Trainer => {
      * @todo insure current set is checked before trying to move back.
      */
     const previousSet = async () => {
-        stopSound();
+        await stopSound();
         setUITimerState(true)
         setUIRemainingReps(0);
         remainingReps.current = 0;
-        stopWorkout();
+        await stopWorkout();
         setUIColor('#b4b1ac');
         setActiveTimerName("CountdownTimer");
         timerCount.current = 10;
@@ -181,9 +180,9 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description moves to next rep within set
      */
     const nextRep = async () => {
-        stopSound();
+        await stopSound();
         if (remainingReps.current !== 1) {
-            stopWorkout();
+            await stopWorkout();
             setUITimerState(true);
             setUIColor("red");
             remainingReps.current -= 1;
@@ -202,9 +201,9 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description moves to previous rep within set
      */
     const previousRep = async () => {
-        stopSound();
+        await stopSound();
         if (remainingReps.current !== currentSet.current?.reps) {
-            stopWorkout();
+            await stopWorkout();
             setUITimerState(true);
             setUIColor("red");
             remainingReps.current += 1;
@@ -223,7 +222,7 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description starts the work/hold timer
      */
     const startWork = async () => {
-        stopSound();
+        await stopSound();
         setUIClock(formatTime(new Date(), timerCount.current))
         setActiveTimerName("WorkoutTimer");
         setUIColor("#EBB93E");
@@ -232,7 +231,7 @@ const useTrainer = (workout: Workout): Trainer => {
         setUIProgress(workTimeFraction * timerCount.current);
         workTimerId.current = setInterval(() => {
             if (timerCount.current > 1) {
-                bundleSound.play();
+                bundleSound.current?.play();
             }
             performWorkChecks(workTimeFraction);
             }, 1000);
@@ -253,6 +252,7 @@ const useTrainer = (workout: Workout): Trainer => {
 
         restTimerId.current = setInterval(async () => {
             // every thirty seconds play the remaining seconds
+            // todo: fix so it also says minutes
             let timeLeft: string = `${timerCount.current} seconds left`;
             
             if (halfMinuteCounter === 30) {
@@ -263,17 +263,25 @@ const useTrainer = (workout: Workout): Trainer => {
             }
             halfMinuteCounter++
 
-            if (timerCount.current <= 0) {
+            if (timerCount.current < 1) {
+                await logRep({
+                    percentage: 100,
+                    setIndex: currentSetIndex.current,
+                    setId: currentSet.current?.id,
+                    sessionId: session.current?.id
+                });
+                
                 if(restTimerId?.current) {
                     clearInterval(restTimerId?.current);
                 }
+                
                 timerCount.current = currentSet.current?.hangTime ?? 0;
                 await startWork()
                 return;
             } else {
                 subtractFromClock();
                 if (timerCount.current > 1 && timerCount.current < 6) {
-                    bundleSound.play();
+                    bundleSound.current?.play();
                 }
                 timerCount.current -= 1;
                 setUIProgress(restFraction * timerCount.current);
@@ -295,6 +303,7 @@ const useTrainer = (workout: Workout): Trainer => {
             return;
         }
 
+        // if end of rep
         if (timerCount.current <= 0) {
             setUIRepStack((repStack: Array<RepStack>) => {
                 return [{
@@ -304,13 +313,18 @@ const useTrainer = (workout: Workout): Trainer => {
                     totalReps: currentSet.current?.reps,
                     repIndex: repStack.length - 1,
                     setId: currentSet.current?.id,
-                },
-                    ...repStack
-                ]
+                }]
             });
         }
 
+        // if last rep of set
         if (remainingReps.current <= 1) {
+            const lastRepDetails = {
+                percentage: 100,
+                setIndex: currentSetIndex.current,
+                setId: currentSet.current?.id,
+                sessionId: session.current?.id
+            }
             // move to next set
             clearInterval(workTimerId.current);
             setUIRemainingReps(0)
@@ -318,6 +332,7 @@ const useTrainer = (workout: Workout): Trainer => {
             currentSetIndex.current += 1;
             // if the at last set
             if (currentSetIndex.current >= workout.sets.length) {
+                await logRep(lastRepDetails);
                 // end workout
                 clearInterval(workTimerId.current);
                 // output logged session
@@ -329,14 +344,16 @@ const useTrainer = (workout: Workout): Trainer => {
             currentSet.current = workout.sets[currentSetIndex.current];
             remainingReps.current = currentSet.current.reps;
             setUIColor('#b4b1ac')
-            setTimeout(() => {
-                playAudioAtPath(workout.sets[currentSetIndex.current].instructionAudioURL)
+            setTimeout(async () => {
+                await playText(workout.sets[currentSetIndex.current].instructions);
             }, 2000)
 
-            setActiveTimerName("CountdownTimer");
-            await startCountdown()
+            setActiveTimerName("CountdownTimer");           
+            await startCountdown();
+            // log the previous set's details
+            await logRep(lastRepDetails);
             timerCount.current = currentSet.current.hangTime;
-            await startWork()
+            await startWork();
             return;
         }
 
@@ -356,15 +373,13 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description starts countdown and returns promise.
      */
     const startCountdown = async () => {
-        await setAudioFromBundle("beep_tone.mp3");
         setUIColor('#b4b1ac');
         setUIClock(formatTime(new Date(), timerCount.current))
         let timerFraction: number = 100 / timerCount.current
         return new Promise((resolve) => {
             countdownTimerId.current = setInterval(() => {
-
                 if (timerCount.current > 1 && timerCount.current < 6) {
-                    bundleSound.play();
+                    bundleSound.current?.play();
                 }
 
                 timerCount.current -= 1;
@@ -394,8 +409,8 @@ const useTrainer = (workout: Workout): Trainer => {
     /**
      * @description stops all timers
      */
-    const stopWorkout = () => {
-        stopSound();
+    const stopWorkout = async () => {
+        await stopSound();
         clearInterval(workTimerId.current);
         clearInterval(restTimerId.current);
         clearInterval(countdownTimerId.current);
@@ -409,14 +424,15 @@ const useTrainer = (workout: Workout): Trainer => {
      */
     const stopSound = async () => {
         await Tts.stop();
-        bundleSound?.stop();
+        bundleSound.current?.stop();
     }
 
     /**
      * @param RepStack object to log
      * @description Logs a rep stack object to rep log.
      */
-    const logRep = async ({percentage, setIndex, setId}: RepStack) => {        
+    const logRep = async ({percentage, setIndex, setId, sessionId}: RepStack) => {
+        setUIRepStack([])
         let loggedRep: LoggedRep = {
             secondsCompleted: (workout.sets[setIndex].hangTime / 100) * percentage,
             percentageCompleted: percentage,
@@ -431,9 +447,8 @@ const useTrainer = (workout: Workout): Trainer => {
             firstRepLogged.current = true;
             return;
         }
-        
-        await logRepetition(session.current.id, loggedRep);
-        setUIRepStack([]);
+     
+        await logRepetition(sessionId, loggedRep);
     }
 
     /**
@@ -455,34 +470,13 @@ const useTrainer = (workout: Workout): Trainer => {
 
     const setAudioFromBundle = (fileName: string) =>
         new Promise<void>((resolve, reject) => {
-            bundleSound = new Sound(fileName, Sound.MAIN_BUNDLE, (error) => {
+            bundleSound.current = new Sound(fileName, Sound.MAIN_BUNDLE, (error) => {
                 if (error) {
                     return;
                 }
                 resolve();
             });
         })
-
-    const playAudioAtPath = (audioPath: string) => (
-        new Promise<void>((resolve, reject) => {
-            pathSound = new Sound(audioPath, null, (error) => {
-                if (error) {
-                    return;
-                }
-                // when loaded successfully
-                pathSound?.play(success => {
-                    if (success) {
-                        resolve()
-                    } else {
-
-                        reject()
-                    }
-                })
-
-                pathSound.release();
-            });
-        })
-    )
 
     const playText = async (text: string) => {
         await Tts.stop();

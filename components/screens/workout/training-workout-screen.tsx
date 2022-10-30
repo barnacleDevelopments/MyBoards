@@ -42,13 +42,6 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
             scrollBottom();
         }
     }, [trainer.activeTimerName]);
-
-    useEffect(() => {
-        if (trainer.UIRepStack.length === 0 && workoutComplete) {
-            navigation.navigate("Dash")
-        }
-
-    }, [trainer.UIRepStack.length]);
     
     const scrollBottom = () => {
         scrollViewRef.current.scrollToEnd({
@@ -56,11 +49,10 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
         })
     }
 
-    const startWorkout = () => {
-        trainer.startWorkout().then(() => {
-            setWorkoutComplete(true)
-            trainer.stopWorkout();
-        });
+    const startWorkout = async () => {
+        await trainer.startWorkout()
+        await trainer.stopWorkout();
+        navigation.navigate("Dash")
     }
 
     const displayProgressText = () => {
@@ -188,12 +180,6 @@ const TrainingWorkoutScreen = ({navigation, route}: Props) => {
                         </View>
                     </View> : null}
                     <View style={{ width: '100%'}}>
-                        {workoutComplete ?
-                            <DescriptionBox
-                                header="Congrats you've reached the end"
-                                text='If you have any remaining reps to confirm
-                                      they will appear here. '/>
-                            : null}
                         {trainer.UIRepStack.map((rs: RepStack, i) => (
                             <RepCompleter
                                 key={i}

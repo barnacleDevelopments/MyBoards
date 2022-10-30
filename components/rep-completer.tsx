@@ -35,37 +35,18 @@ const LogButton = ({onPress, disabled, title, color}: {onPress: () => void, disa
 
 const RepCompleter = memo(({onSelection, repStack, onLog, index}: RepCompleterProps) => {
     const [inProgress, setInProgress] = useState(false);
-    const [autoLogProgress, setAutoLogProgress] = useState(100);
-    
-    useEffect(() => {
-        const timer = setInterval(async () => {
-            setAutoLogProgress((alp) => {
-                (async () => {
-                    if(alp === 0) {
-                        clearInterval(timer);
-                        await completeRep(100);
-                    }
-                })()
-                  
-                    return alp - 1
-            });
-        }, 300);
-    }, []);
 
     const completeRep = async (percentage: number) => {
         setInProgress(true);
         // send rep log to backend
         await onLog({...repStack, percentage});
         setInProgress(false);
+        // remove the rep logger element from page after selection.
+        onSelection(rs => rs.filter(r => r.repIndex !== repStack.repIndex));
     }
 
     return (
         <View style={styles.container}>
-            {autoLogProgress > 1 ? <View style={{...styles.autoCompleteBar, width: `${autoLogProgress}%`}}>
-                {autoLogProgress > 40  ? <Text>
-                    Auto Logging In {autoLogProgress}
-                </Text> : null}
-            </View>: null}
             <View>
                 {!inProgress ? <View style={{display: "flex", justifyContent: "flex-start", flexDirection: "row"}}>
                     <View style={{width: '100%', marginBottom: 15}}>
@@ -73,18 +54,12 @@ const RepCompleter = memo(({onSelection, repStack, onLog, index}: RepCompleterPr
                             Rep {`${repStack.setRepIndex + 1}/${repStack.totalReps}`}
                         </Text>
                         <Text style={{fontSize: 25, textAlign: 'center', color: '#f5f5f5'}}>
-                            Set {repStack.setIndex + 1}
+                            How did you do?
                         </Text>
                     </View>
                 </View> : null}
                 {!inProgress ? <View>
                         <View style={{display: 'flex', flexDirection: 'row', justifyContent: "center", marginBottom: 15}}>
-                            <View style={{marginLeft: 10}}>
-                                <LogButton title='70%'
-                                           onPress={async () => await completeRep(70)}
-                                           disabled={index !== 0}
-                                           color="#454545" />
-                            </View>
                             <View style={{marginLeft: 10}}>
                                 <LogButton  title='80%'
                                             onPress={async () => await completeRep(80)}
@@ -97,6 +72,12 @@ const RepCompleter = memo(({onSelection, repStack, onLog, index}: RepCompleterPr
                                             disabled={index !== 0}
                                             color="#7D7D7D"/>
                             </View>
+                            <View style={{marginLeft: 10}}>
+                            <LogButton  title='COMPLETED'
+                                        onPress={async () => await completeRep(100)}
+                                        disabled={index !== 0}
+                                        color="green"/>
+                            </View>
                         </View>
                         <View style={{display: 'flex', flexDirection: 'column', justifyContent: "center"}}>
                             <Pressable style={{backgroundColor: 'red', padding: 10, paddingTop: 15,marginBottom: 10,  paddingBottom: 15, borderRadius: 4, width: '100%'}} onPress={() => completeRep(0)} >
@@ -104,10 +85,7 @@ const RepCompleter = memo(({onSelection, repStack, onLog, index}: RepCompleterPr
                                     NOT COMPLETE
                                 </Text>
                             </Pressable>
-                            <LogButton  title='COMPLETED'
-                                        onPress={async () => await completeRep(100)}
-                                        disabled={index !== 0}
-                                        color="green"/>
+                   
                         </View>
                     </View>
                     :
