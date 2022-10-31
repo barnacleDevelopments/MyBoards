@@ -102,6 +102,15 @@ const HangboardForm: React.FC<HangboardFormProps> = ({
             headerShown: false
         });
     }
+    
+    const hideEditPrompt = () => {
+        // check if the state of the hangboard changed
+        setIsEditPrompt(false);
+        navigation.setOptions({
+            headerShown: true
+        });
+        
+    }
 
     return (
         <Formik
@@ -154,7 +163,10 @@ const HangboardForm: React.FC<HangboardFormProps> = ({
                                                       text={"Want to save your changes?"}
                                                       btnText={"Save"}
                                                       cancelable={true}
-                                                      onConfirm={handleSubmit}  
+                                                      onConfirm={() => {
+                                                          hideEditPrompt()
+                                                          handleSubmit();
+                                                      }}  
                                                       onCancel={() => {
                                                           setIsEditPrompt(false);
                                                           navigation.setOptions({
