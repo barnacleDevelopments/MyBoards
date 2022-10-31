@@ -1,5 +1,5 @@
 import {Formik} from "formik";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import * as Yup from 'yup';
 import {useNavigation} from "@react-navigation/native";
 
@@ -16,6 +16,8 @@ import globalStyles from "../../styles/global";
 import {imageAspectRatio, positionPin} from "../../functions/hangboard-panel";
 import {ImageData} from "../../types/image-data";
 import SecondaryButton from "../buttons/secondary-btn";
+import {HeaderBackButton} from "@react-navigation/elements";
+import ConfirmPopUp from "./form-components/confirm-pop-up";
 
 const hangboardSchema = Yup.object().shape({
     name: Yup.string()
@@ -32,18 +34,24 @@ interface HangboardFormProps {
     handleHangboard: (hangboard: Hangboard) => void
 }
 
-const HangboardForm = ({
+const HangboardForm: React.FC<HangboardFormProps> = ({
                            hangboard,
                            onSubmit,
                            onFingerSelect,
                            onPhoto,
                            handleHangboard
-                       }: HangboardFormProps) => {
+                       }) => {
 
     const navigation = useNavigation();
     const [image, setImage] = useState<ImageData>({path: "", mime: "", name: "", width: 0, height: 0});
     const [screenSize, setScreenSize] = useState<BoardDimensions>({width: 0, height: 0});
+    const [isEditPrompt, setIsEditPrompt] = useState(false);
+    const originalHangboardHoldsRef = useRef<string>();
 
+    useEffect(() => {
+        originalHangboardHoldsRef.current = JSON.stringify(hangboard.holds);
+    },[])
+    
     useEffect(() => {
         setImage(image => ({...image, path: hangboard?.imageURL}))
     }, [hangboard.imageURL]);
@@ -86,6 +94,14 @@ const HangboardForm = ({
             handleHangboard({...hangboardToUpdate});
         }
     }
+    
+    const displayEditPrompt = () => {
+        // check if the state of the hangboard changed
+        setIsEditPrompt(true);
+        navigation.setOptions({
+            headerShown: false
+        });
+    }
 
     return (
         <Formik
@@ -103,18 +119,48 @@ const HangboardForm = ({
             {/* Form Handling */}
             {({handleChange, handleSubmit, touched, values, errors}) => {
                 useEffect(() => {
-                    navigation.setOptions({
-                        headerRight: () =>
-                            <SecondaryButton
-                                color="#EBB93E"
-                                title='Finished'
-                                disabled={!isFormFinished}
-                                onPress={handleSubmit}/>
-                    });
+                    if(hangboard.id) {
+                        navigation.setOptions({
+                            headerLeft: (props: any) =>
+                                <HeaderBackButton {...props} onPress={() => {
+                                    if(typeof originalHangboardHoldsRef.current === 'string' &&
+                                        (originalHangboardHoldsRef.current !== JSON.stringify(hangboard.holds))) {
+                                        
+                                        displayEditPrompt();
+                                        return
+                                    }
+
+                                    // otherwise navigate back to hangboard list
+                                    navigation.navigate("Hangboards")
+                                }} />
+                        });
+                    } else {
+                        navigation.setOptions({
+                            headerRight: () =>
+                                <SecondaryButton
+                                    color="#EBB93E"
+                                    title='Finished'
+                                    disabled={!isFormFinished}
+                                    onPress={handleSubmit}/>,
+
+                        });
+                    }
+                    
                 }, [image.path, hangboard?.holds.length]);
 
                 return (
                     <View style={{...globalStyles.container}}>
+                        {isEditPrompt ? <ConfirmPopUp title={"Save"} 
+                                                      text={"Want to save your changes?"}
+                                                      btnText={"Save"}
+                                                      cancelable={true}
+                                                      onConfirm={handleSubmit}  
+                                                      onCancel={() => {
+                                                          setIsEditPrompt(false);
+                                                          navigation.setOptions({
+                                                              headerShown: true
+                                                          });
+                                                      } }/> : null}
                         {/* Form fields */}
                         <ScrollView contentContainerStyle={styles.holdConfigContainer}>
                             {hangboard.holds.length < 0 ?
@@ -179,7 +225,7 @@ const HangboardForm = ({
                                         </View>
                                     ) : null}
                                 </View>
-                                <View style={styles.mainButtons}>
+                                {!hangboard.id ? <View style={styles.mainButtons}>
                                     <Button
                                         color="#EBB93E"
                                         title={image.path ? 'Change Image' : 'Upload Image'}
@@ -207,7 +253,7 @@ const HangboardForm = ({
                                             fontSize: 15
                                         }}>{hangboard.holds.length > 0 ? 'Re-Position Holds' : 'Position Holds'}</Text>
                                     </Pressable> : null}
-                                </View>
+                                </View> : null}
                             </View>
                             {/* Hold configuration */}
                             {hangboard?.holds?.sort((a, b) => a.index < b.index ? -1 : 1).map((hold, i) => (
