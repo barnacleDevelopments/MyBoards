@@ -180,9 +180,8 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description moves to next rep within set
      */
     const nextRep = async () => {
-        await stopSound();
         if (remainingReps.current !== 1) {
-            await stopWorkout();
+            stopWorkout();
             setUITimerState(true);
             setUIColor("red");
             remainingReps.current -= 1;
@@ -201,9 +200,8 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description moves to previous rep within set
      */
     const previousRep = async () => {
-        await stopSound();
         if (remainingReps.current !== currentSet.current?.reps) {
-            await stopWorkout();
+            stopWorkout();
             setUITimerState(true);
             setUIColor("red");
             remainingReps.current += 1;
@@ -229,6 +227,7 @@ const useTrainer = (workout: Workout): Trainer => {
         await playText("Hold");
         const workTimeFraction: number = 100 / (currentSet.current?.hangTime ?? 0);
         setUIProgress(workTimeFraction * timerCount.current);
+        clearInterval(workTimerId.current);
         workTimerId.current = setInterval(() => {
             if (timerCount.current > 1) {
                 bundleSound.current?.play();
@@ -249,7 +248,8 @@ const useTrainer = (workout: Workout): Trainer => {
         setUIProgress(restFraction * timerCount.current);
         await playText("rest");
         let halfMinuteCounter: number = 0;
-
+        
+        clearInterval(restTimerId.current);
         restTimerId.current = setInterval(async () => {
             // every thirty seconds play the remaining seconds
             // todo: fix so it also says minutes
@@ -377,6 +377,7 @@ const useTrainer = (workout: Workout): Trainer => {
         setUIClock(formatTime(new Date(), timerCount.current))
         let timerFraction: number = 100 / timerCount.current
         return new Promise((resolve) => {
+            clearInterval(countdownTimerId.current)
             countdownTimerId.current = setInterval(() => {
                 if (timerCount.current > 1 && timerCount.current < 6) {
                     bundleSound.current?.play();
@@ -410,7 +411,8 @@ const useTrainer = (workout: Workout): Trainer => {
      * @description stops all timers
      */
     const stopWorkout = async () => {
-        await stopSound();
+        console.log("INterval Timer: ", countdownTimerId.current)
+        stopSound();
         clearInterval(workTimerId.current);
         clearInterval(restTimerId.current);
         clearInterval(countdownTimerId.current);

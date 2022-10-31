@@ -16,3 +16,28 @@ export function secondsToMinutes(value) {
     if (seconds < 10) {seconds = "0"+seconds;}
     return minutes+':'+seconds; // Return is HH : MM : SS
 }
+
+export function debounce(cb, delay = 250) {
+    let timeout
+
+    return (...args) => {
+        clearTimeout(timeout)
+        timeout = setTimeout(() => {
+            cb(...args)
+        }, delay)
+    }
+}
+
+export function throttle(cb, delay = 250) {
+    let shouldWait = false
+
+    return (...args) => {
+        if (shouldWait) return
+
+        cb(...args)
+        shouldWait = true
+        setTimeout(() => {
+            shouldWait = false
+        }, delay)
+    }
+}

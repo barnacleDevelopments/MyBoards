@@ -198,7 +198,6 @@ const WorkoutForm = ({
 
     const moveSet = (setIndex: number, direction: "up" | "down") => {
         setHandler(sets => {
-            console.log(sets)
             switch (direction) {
                 case "up":
                     if(sets.indexOf(sets[setIndex - 1]) < 0) break;
@@ -214,7 +213,6 @@ const WorkoutForm = ({
                     break;
 
             }
-            console.log(sets)
             return [...sets];
         })
     }
