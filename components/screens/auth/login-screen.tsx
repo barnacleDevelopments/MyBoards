@@ -8,7 +8,7 @@ import APIErrorNotification from "../../error-notification";
 import useAPIError from "../../../hooks/use-api-error";
 import {UserContext} from "../../../contexts/user-context";
 import {useNavigation} from "@react-navigation/native";
-import ConfirmPopUp from "./confirm-pop-up";
+import ConfirmPopUp from "../../forms/form-components/confirm-pop-up";
 
 const SignInScreen = () => {
   const {signIn} = useContext(AuthContext);

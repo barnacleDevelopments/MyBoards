@@ -6,7 +6,7 @@ import axios from "axios";
 import Config from "react-native-config";
 import APIErrorNotification from "../../error-notification";
 import useAPIError from "../../../hooks/use-api-error";
-import ConfirmPopUp from "./confirm-pop-up";
+import ConfirmPopUp from "../../forms/form-components/confirm-pop-up";
 
 const PasswordResetScreen = ({navigation}) => {
 
@@ -46,6 +46,7 @@ const PasswordResetScreen = ({navigation}) => {
                 </Text>
             </View>
             {emailSent ? <ConfirmPopUp title="Email Sent!"
+                                       btnText="Back to Login"
                                        text="Please visit your inbox to reset your password."
                                        onConfirm={() => navigation.navigate("SignIn")}/> : null}
         </View>

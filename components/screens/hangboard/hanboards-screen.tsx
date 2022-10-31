@@ -35,7 +35,6 @@ const HangboardScreen = ({navigation}: Props) => {
     const netInfo = useNetInfo();
     const [hangboards, setHangboards] = useState<Array<Hangboard>>([]);
     const [deleteWarning, setDeleteWarning] = useState<boolean>(false);
-    const [editWarning, setEditWarning] = useState<boolean>(false);
     const [selectedHangboardId, setSelectedHangboardId] = useState<number>();
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<{ status: boolean, message: string }>({status: false, message: ''});
@@ -47,7 +46,6 @@ const HangboardScreen = ({navigation}: Props) => {
         React.useCallback(() => {
             (async () => {
                 await updateUser()
-                setEditWarning(false);
                 setDeleteWarning(false);
                 try {
                     const result = await getAllHangboards();
@@ -96,14 +94,6 @@ const HangboardScreen = ({navigation}: Props) => {
                     onClose={() => setDeleteWarning(false)}/>
                 : null}
 
-            {editWarning ?
-                <Warning
-                    text='Are you sure you want to edit this hangboard?
-                Editing this hangboard will also delete any workouts you have created with it.'
-                    onConfirm={() => navigation.navigate("Edit Hangboard", {hangboardId: selectedHangboardId})}
-                    onClose={() => setEditWarning(false)}/>
-                : null}
-
             {/* If no boards exist prompt user to create board */}
             {!user?.hasCreatedFirstHangboard && !loading ?
                 <DescriptionBox
@@ -138,8 +128,7 @@ const HangboardScreen = ({navigation}: Props) => {
                                     setDeleteWarning(true);
                                 }}
                                 onEditPress={() => {
-                                    setSelectedHangboardId(x.id)
-                                    setEditWarning(true);
+                                    navigation.navigate("Edit Hangboard", {hangboardId: x.id})
                                 }}
                                 key={i}
                                 hangboard={x}
@@ -149,7 +138,7 @@ const HangboardScreen = ({navigation}: Props) => {
                 <View style={{marginBottom: 15}}></View>
             </ScrollView>
 
-            {deleteWarning || editWarning ? null :
+            {deleteWarning ? null :
                 <View>
                     <PrimaryButton
                         title='Create Hangboard'
