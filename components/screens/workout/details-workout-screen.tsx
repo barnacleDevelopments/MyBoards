@@ -36,7 +36,7 @@ const DetailsWorkoutScreen = ({navigation, route}) => {
                 <Button
                     title='train'
                     color={"#EBB93E"}
-                    disabled={workout ? false : true}
+                    disabled={!workout}
                     onPress={() => navigation.navigate("TrainingWorkoutScreen", workout)}
                 />
             </View>
