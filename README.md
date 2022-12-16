@@ -3,6 +3,5 @@ MyBoards is a React Native application for hangboard training. It is an always o
 
 **Technologies Used:**
 - C# ASP.NET API 
-- React Native Client
 - Postgres SQL Database
 
