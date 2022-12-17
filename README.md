@@ -23,7 +23,7 @@ I set out to create an app that solves these issues.
 These were hard problems to solve so I decided to start with customizability for equipment. 
 
 # Setup
-To setup this app for development you'll need (Android Studio)[https://developer.android.com/studio] and the [MyBoards API](https://github.com/barnacleDevelopments/MyBoardsAPI).
+To setup this app for development you'll need [Android Studio](https://developer.android.com/studio) and the [MyBoards API](https://github.com/barnacleDevelopments/MyBoardsAPI).
 
 **Technologies Used:**
 - React Native Client
