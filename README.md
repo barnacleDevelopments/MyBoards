@@ -10,7 +10,7 @@ This application grew as a passion project while I was attending colledge. I wan
 ### The Problem
 Existing hangboard apps aren't flexible enough for climbers because they are blocking in nature. There are a few things that give them this quality. 
 - Takes to long to create workouts.
-- Pr-configured workouts are too easy or too hard for the individual.
+- Pre-configured workouts are too easy or too hard for the individual.
 - App takes to long to setup for a workout.
 - Aren't suited for the individuals available equipment. 
 
