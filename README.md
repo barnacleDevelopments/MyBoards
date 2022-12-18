@@ -20,7 +20,7 @@ I set out to create an app that solves these issues.
 - One click start 
 - Can use any equipment available. 
 
-These were hard problems to solve so I decided to start with customizability for equipment. 
+These were hard problems to solve so I decided to start with customizability for equipment. **I have listed the features in progress on the project view.**
 
 # Setup
 To setup this app for development you'll need [Android Studio](https://developer.android.com/studio) and the [MyBoards API](https://github.com/barnacleDevelopments/MyBoardsAPI).
