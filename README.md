@@ -5,7 +5,7 @@ MyBoards is a React Native application for hangboard training.
 MyBoards is an always online app that uses the [MyBoards API](https://github.com/barnacleDevelopments/MyBoardsAPI) to manage its data. I encourage pull requests if anyone is interested in further developing the platform. I'd like to one day have this app available to the wider public. 
 
 ## Reason for Creating MyBoards
-This application grew as a passion project while I was attending colledge. I wanted to create software that helped climbers become better at their craft. So I thought of creating a app for hangboard training would be a good start. 
+This application grew as a passion project while I was attending college. I wanted to create software that helped climbers become better at their craft. So I thought of creating a app for hangboard training would be a good start. 
 
 ### The Problem
 Existing hangboard apps aren't flexible enough for climbers because they are blocking in nature. There are a few things that give them this quality. 
